@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="libswt/win32/swt.jar"/>
+	<classpathentry kind="lib" path="libext/kettle-core.jar"/>
+	<classpathentry kind="lib" path="libext/kettle-db.jar"/>
+	<classpathentry kind="lib" path="libext/kettle-engine.jar"/>
+	<classpathentry kind="lib" path="libext/kettle-ui-swt.jar"/>
+	<classpathentry kind="lib" path="/cmisget/lib/cmisget.jar"/>
+	<classpathentry kind="lib" path="libext/alfresco/alfresco-opencmis-extension-0.2.jar"/>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-api-0.5.0.jar"/>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-bindings-0.5.0.jar"/>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-impl-0.5.0.jar"/>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-api-0.5.0.jar"/>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-impl-0.5.0.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
