@@ -21,6 +21,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.sax.BodyContentHandler;
+
 
 
 //import org.alfresco.cmis.client.AlfrescoDocument;
