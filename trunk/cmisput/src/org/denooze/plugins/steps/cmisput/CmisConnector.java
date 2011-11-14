@@ -11,6 +11,7 @@
 
 package org.denooze.plugins.steps.cmisput;
 
+import java.io.File;
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -25,6 +26,8 @@ import org.apache.tika.metadata.Metadata;
 import org.apache.tika.parser.AutoDetectParser;
 import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
+import org.xml.sax.ContentHandler;
+
 
 
 
@@ -499,7 +502,7 @@ public class CmisConnector implements Cloneable
 			return false;
 		}
 		
-		ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(), file);
+		ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(sourcefile), file);
 	    properties.put(PropertyIds.OBJECT_TYPE_ID, documenttype);
 	    setCmsdocument(createDocument(getParentFolder(),content,properties));
 	    if (getCmsdocument()==null){
@@ -587,8 +590,9 @@ public class CmisConnector implements Cloneable
 			return false;
 		}
 		try {
-			file = new FileInputStream(sourcefile);AlfrescoDocument checkedOutDocument = (AlfrescoDocument) session.getObject(CmisDocId);
-			ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(), file);
+			file = new FileInputStream(sourcefile);
+			AlfrescoDocument checkedOutDocument = (AlfrescoDocument) session.getObject(CmisDocId);
+			ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(sourcefile), file);
 		    properties.put(PropertyIds.OBJECT_TYPE_ID, documenttype);
 		    if (this.VersioningState.equals(org.apache.chemistry.opencmis.commons.enums.VersioningState.MAJOR)) {
 				checkedInDocId = checkedOutDocument.checkIn(true, properties, content, comment);
@@ -613,11 +617,40 @@ public class CmisConnector implements Cloneable
 	    }
 	}
 	
-	private String DetectMimeType(){
+	private String DetectMimeType(String sourcefile){
 
 		/* TODO detect mime type */
-		
-		return "plain/text";
+		FileInputStream is = null;
+		Metadata metadata = null;
+		    try {
+		      File f = new File(sourcefile);
+		      is = new FileInputStream(f);
+
+		      ContentHandler contenthandler = new BodyContentHandler();
+		      metadata = new Metadata();
+		      metadata.set(Metadata.RESOURCE_NAME_KEY, f.getName());
+		      Parser parser = new AutoDetectParser();
+		      // OOXMLParser parser = new OOXMLParser();
+		      parser.parse(is, contenthandler, metadata);
+//		      System.out.println("Mime: " + metadata.get(Metadata.CONTENT_TYPE));
+		    }
+		    catch (Exception e) {
+		      e.printStackTrace();
+		    }
+		    finally {
+		        if (is != null)
+					try {
+						is.close();
+					} catch (IOException e) {
+						/* not interested in error*/
+					}
+		    }
+		    
+		    if (is != null) {
+		    	return "plain/text";
+		    } else {
+		    	return metadata.get(Metadata.CONTENT_TYPE);
+		    }
 	}
 	
 
