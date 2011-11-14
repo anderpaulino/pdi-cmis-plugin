@@ -16,7 +16,6 @@ import java.util.Properties;
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
-import org.chicagometallic.plugins.steps.cmisget.CmisConnector;
 import org.eclipse.swt.widgets.TableItem;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;

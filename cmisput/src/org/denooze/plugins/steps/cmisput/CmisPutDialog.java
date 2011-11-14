@@ -65,7 +65,6 @@ import org.pentaho.di.ui.core.widget.ColumnInfo;
 import org.pentaho.di.ui.core.widget.TableView;
 import org.pentaho.di.ui.core.widget.TextVar;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
-import org.chicagometallic.plugins.steps.cmisget.CmisConnector;
 
 public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 {
