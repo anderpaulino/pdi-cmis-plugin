@@ -14,5 +14,6 @@
 	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-impl-0.5.0.jar"/>
 	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-api-0.5.0.jar"/>
 	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-impl-0.5.0.jar"/>
+	<classpathentry kind="lib" path="libext/tika/tika-app-0.10.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
