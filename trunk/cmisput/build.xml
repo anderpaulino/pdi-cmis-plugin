@@ -18,7 +18,9 @@
     <property name="distrib"   location="distrib"/>
     <property name="libext"    location="libext"/>
     <property name="libswt"    location="libswt"/>
+	<!--
     <property name="cmisconnector"   location="../cmisget/distrib"/>
+    -->
     <property name="deploydir" location="../Kettle 4.2.0/distrib/plugins/steps/cmisput"/>
 
     <target name="init" description="create timestamp and directories">
@@ -64,7 +66,10 @@
                 <fileset dir="${libswt}/win32/" includes="*.jar"/>
                 <fileset dir="${libext}/opencmis/" 		includes="*.jar"/>
                 <fileset dir="${libext}/alfresco/" 		includes="*.jar"/>
+                <fileset dir="${libext}/tika/" 		includes="*.jar"/>
+            	<!--
                 <fileset dir="${cmisconnector}" 		includes="*.jar"/>
+                -->
             </classpath>
         </javac>
     </target>
@@ -116,11 +121,13 @@
                 dir="${resources}/lib" 
                 includes="*.jar"/>
         </copy>
+    	<!--
     	<copy todir="${deploydir}/lib">
     	        <fileset
     	             dir="${cmisconnector}" 
     	                includes="*.jar"/>
-    	</copy>
+    	</copy> 
+    	-->
     </target>
 
     <!--
@@ -159,11 +166,13 @@
                 dir="${resources}/lib" 
                 includes="*.jar"/>
         </copy>
+    	<!--
     	<copy todir="${deploydir}/lib">
     	        <fileset
     	             dir="${cmisconnector}" 
     	                includes="*.jar"/>
     	</copy>
+    	-->
     </target>
 
     <!--
