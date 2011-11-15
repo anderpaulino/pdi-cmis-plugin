@@ -6,6 +6,9 @@
 
     <tstamp prefix="start"/>
 
+    <!-- Look for user-override properties file first -->        
+	<property file="override.properties"/>
+	
     <!-- system properties to use -->
     <property name= "cr" value="${line.separator}"/> 
 
