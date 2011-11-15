@@ -12,7 +12,6 @@
 
 package org.denooze.plugins.steps.cmisput;
 
-import org.chicagometallic.plugins.steps.cmisget.CmisConnector;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.trans.step.BaseStepData;
 import org.pentaho.di.trans.step.StepDataInterface;

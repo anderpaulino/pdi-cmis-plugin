@@ -28,9 +28,6 @@ import org.apache.tika.parser.Parser;
 import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
 
-
-
-
 //import org.alfresco.cmis.client.AlfrescoDocument;
 //import org.alfresco.cmis.client.AlfrescoFolder;
 import org.alfresco.cmis.client.AlfrescoDocument;
@@ -631,7 +628,7 @@ public class CmisConnector implements Cloneable
 		      metadata.set(Metadata.RESOURCE_NAME_KEY, f.getName());
 		      Parser parser = new AutoDetectParser();
 		      // OOXMLParser parser = new OOXMLParser();
-		      parser.parse(is, contenthandler, metadata);
+		      parser.parse(is, contenthandler, metadata,null);
 //		      System.out.println("Mime: " + metadata.get(Metadata.CONTENT_TYPE));
 		    }
 		    catch (Exception e) {

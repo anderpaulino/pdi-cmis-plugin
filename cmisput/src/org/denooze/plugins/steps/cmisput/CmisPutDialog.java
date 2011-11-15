@@ -80,9 +80,9 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
     
     private Composite	 wPropertiesComp;
     
-    private Label        wlStandard;
-    private CCombo       wStandard;
-    private FormData     fdlStandard, fdStandard;
+//    private Label        wlStandard;
+//    private CCombo       wStandard;
+//    private FormData     fdlStandard, fdStandard;
     
     private Label        wlDocumentType;
     private CCombo       wDocumentType;
