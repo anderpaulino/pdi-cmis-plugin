@@ -68,7 +68,7 @@
   <notepads>
   </notepads>
   <order>
-  <hop> <from>Data Grid</from><to>Put document via CMIS</to><enabled>N</enabled> </hop>  <hop> <from>Data Grid</from><to>Put document via CMIS 2</to><enabled>Y</enabled> </hop>  </order>
+  <hop> <from>Data Grid</from><to>Put document via CMIS</to><enabled>Y</enabled> </hop>  </order>
   <step>
     <name>Data Grid</name>
     <type>DataGrid</type>
@@ -227,46 +227,6 @@
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
       <xloc>363</xloc>
       <yloc>47</yloc>
-      <draw>Y</draw>
-      </GUI>
-    </step>
-
-  <step>
-    <name>Put document via CMIS 2</name>
-    <type>cmisput</type>
-    <description/>
-    <distribute>Y</distribute>
-    <copies>1</copies>
-         <partitioning>
-           <method>none</method>
-           <schema_name/>
-           </partitioning>
-    <url>http:&#47;&#47;cmis.alfresco.com&#47;service&#47;cmis</url>
-    <repository>371554cd-ac06-40ba-98b8-e6b60275cca7</repository>
-    <standard/>
-    <username>admin</username>
-    <password>admin</password>
-    <basecontentmodel>cmis:document</basecontentmodel>
-    <documenttype>D:cmiscustom:document</documenttype>
-    <localnamespacefilter/>
-    <isversioned>Y</isversioned>
-    <ismajorversion>N</ismajorversion>
-    <isminorversion>Y</isminorversion>
-    <hasvariablepath>Y</hasvariablepath>
-    <topath>&#47;pentaho_data_integration&#47;</topath>
-    <documentfield>inputfile</documentfield>
-    <filenamefield>outputfilename</filenamefield>
-    <cmisidfield>cmisid</cmisidfield>
-    <metadata>
-      <folderarg>
-        <folderfield>property2</folderfield>
-        <foldertype>cmis:folder</foldertype>
-      </folderarg>
-    </metadata>
-     <cluster_schema/>
- <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
-      <xloc>375</xloc>
-      <yloc>192</yloc>
       <draw>Y</draw>
       </GUI>
     </step>
