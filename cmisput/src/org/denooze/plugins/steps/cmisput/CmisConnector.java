@@ -17,16 +17,20 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.parser.Parser;
-import org.apache.tika.sax.BodyContentHandler;
+//import org.apache.tika.metadata.Metadata;
+//import org.apache.tika.parser.AutoDetectParser;
+//import org.apache.tika.parser.Parser;
+//import org.apache.tika.sax.BodyContentHandler;
 import org.xml.sax.ContentHandler;
+
+import eu.medsea.mimeutil.MimeType;
+import eu.medsea.mimeutil.MimeUtil;
 
 //import org.alfresco.cmis.client.AlfrescoDocument;
 //import org.alfresco.cmis.client.AlfrescoFolder;
@@ -59,16 +63,21 @@ import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundExcept
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
 import org.apache.chemistry.opencmis.commons.spi.CmisBinding;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ChoiceImpl;
+import org.apache.commons.vfs.FileObject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.TableItem;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.ui.core.dialog.ErrorDialog;
 import org.pentaho.di.ui.core.widget.TableView;
 import org.pentaho.di.ui.core.widget.TextVar;
+
 
 
 /**
@@ -485,21 +494,28 @@ public class CmisConnector implements Cloneable
 		return true;
 	}
 	
-	public Boolean CreateDocument(String documenttype,String cmsfilename,String sourcefile){
+	public Boolean CreateDocument(String documenttype,String cmsfilename,String sourcefile, TransMeta transmeta){
 
 	    final Map<String, Object> properties = getDocumentproperties();
 		FileInputStream file;
 		if (sourcefile==null){
 			return false;
 		}
+		FileObject fileObject = null;
 		try {
-			file = new FileInputStream(sourcefile);
+			fileObject = KettleVFS.getFileObject(sourcefile, transmeta);
+		} catch (KettleFileException e) {
+//			/* should never occur - as previous checks will reveal all error with this cause.*/
+			setMsgError(e.getMessage());
+		}
+		try {
+			file = new FileInputStream(KettleVFS.getFilename(fileObject));
 		} catch (FileNotFoundException e) {
 			setMsgError(e.getMessage());
 			return false;
 		}
 		
-		ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(sourcefile), file);
+		ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(sourcefile, transmeta), file);
 	    properties.put(PropertyIds.OBJECT_TYPE_ID, documenttype);
 	    setCmsdocument(createDocument(getParentFolder(),content,properties));
 	    if (getCmsdocument()==null){
@@ -572,11 +588,17 @@ public class CmisConnector implements Cloneable
 	 * @return checked out document
 	 */
 	public ObjectId CheckOutDocument(Document CmisDoc) {
-		ObjectId id = CmisDoc.checkOut();	
+		ObjectId id = CmisDoc.checkOut();
 		return id;
 	}
 
-	public Boolean CheckInDocument(ObjectId CmisDocId,String documenttype,String cmsfilename,String sourcefile,String comment) {
+	public void CancelCheckOutDocument(ObjectId CmisDocId){
+		/*TODO implement*/
+		AlfrescoDocument document = (AlfrescoDocument) session.getObject(CmisDocId);
+		document.cancelCheckOut();
+	}
+	
+	public Boolean CheckInDocument(ObjectId CmisDocId,String documenttype,String cmsfilename,String sourcefile,String comment, TransMeta transmeta) {
 
 		ObjectId checkedInDocId; 
 
@@ -586,10 +608,19 @@ public class CmisConnector implements Cloneable
 		if (sourcefile==null){
 			return false;
 		}
+		
+		FileObject fileObject = null;
 		try {
-			file = new FileInputStream(sourcefile);
+			fileObject = KettleVFS.getFileObject(sourcefile, transmeta);
+		} catch (KettleFileException e) {
+//			/* should never occur - as previous checks will reveal all error with this cause.*/
+			setMsgError(e.getMessage());
+		}
+		
+		try {
+			file = new FileInputStream(KettleVFS.getFilename(fileObject));
 			AlfrescoDocument checkedOutDocument = (AlfrescoDocument) session.getObject(CmisDocId);
-			ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(sourcefile), file);
+			ContentStream content = new ContentStreamImpl(cmsfilename, null, DetectMimeType(sourcefile, transmeta), file);
 		    properties.put(PropertyIds.OBJECT_TYPE_ID, documenttype);
 		    if (this.VersioningState.equals(org.apache.chemistry.opencmis.commons.enums.VersioningState.MAJOR)) {
 				checkedInDocId = checkedOutDocument.checkIn(true, properties, content, comment);
@@ -614,40 +645,64 @@ public class CmisConnector implements Cloneable
 	    }
 	}
 	
-	private String DetectMimeType(String sourcefile){
+	private String DetectMimeType(String sourcefile, TransMeta transmeta){
 
-		/* TODO detect mime type */
-		FileInputStream is = null;
-		Metadata metadata = null;
-		    try {
-		      File f = new File(sourcefile);
-		      is = new FileInputStream(f);
+		/* TODO change mime type detection to tike - version 1.0 has incompatible classes - so cmis login does not work */
+//		FileInputStream is = null;
+//		Metadata metadata = null;
+//		    try {
+//		      File f = new File(sourcefile);
+//		      is = new FileInputStream(f);
+//
+//		      ContentHandler contenthandler = new BodyContentHandler();
+//		      metadata = new Metadata();
+//		      metadata.set(Metadata.RESOURCE_NAME_KEY, f.getName());
+//		      Parser parser = new AutoDetectParser();
+//		      // OOXMLParser parser = new OOXMLParser();
+//		      parser.parse(is, contenthandler, metadata,null);
+////		      System.out.println("Mime: " + metadata.get(Metadata.CONTENT_TYPE));
+//		    }
+//		    catch (Exception e) {
+//		      e.printStackTrace();
+//		    }
+//		    finally {
+//		        if (is != null)
+//					try {
+//						is.close();
+//					} catch (IOException e) {
+//						/* not interested in error*/
+//					}
+//		    }
+//		    
+//		    if (is != null) {
+//		    	return "plain/text";
+//		    } else {
+//		    	return metadata.get(Metadata.CONTENT_TYPE);
+//		    }
+		
+		String MediaType;
+		
+		FileObject fileObject = null;
+		try {
+			fileObject = KettleVFS.getFileObject(sourcefile, transmeta);
+		} catch (KettleFileException e) {
+//			/* should never occur - as previous checks will reveal all error with this.*/
+			e.printStackTrace();
+		}
+		File f = new File(KettleVFS.getFilename(fileObject));
+		
+		MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+		MimeType m = MimeUtil.getMostSpecificMimeType(MimeUtil.getMimeTypes(f));
 
-		      ContentHandler contenthandler = new BodyContentHandler();
-		      metadata = new Metadata();
-		      metadata.set(Metadata.RESOURCE_NAME_KEY, f.getName());
-		      Parser parser = new AutoDetectParser();
-		      // OOXMLParser parser = new OOXMLParser();
-		      parser.parse(is, contenthandler, metadata,null);
-//		      System.out.println("Mime: " + metadata.get(Metadata.CONTENT_TYPE));
-		    }
-		    catch (Exception e) {
-		      e.printStackTrace();
-		    }
-		    finally {
-		        if (is != null)
-					try {
-						is.close();
-					} catch (IOException e) {
-						/* not interested in error*/
-					}
-		    }
-		    
-		    if (is != null) {
-		    	return "plain/text";
-		    } else {
-		    	return metadata.get(Metadata.CONTENT_TYPE);
-		    }
+	    if (m == null) {
+			MimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.OpendesktopMimeDetector");
+	    	return "plain/text";
+	    } else {
+			MediaType = m.getMediaType()+"/"+m.getSubType();
+			MimeUtil.unregisterMimeDetector("eu.medsea.mimeutil.detector.OpendesktopMimeDetector");
+	    	return MediaType;
+	    }
+
 	}
 	
 

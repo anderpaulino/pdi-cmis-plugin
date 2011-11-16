@@ -11,15 +11,22 @@
 
 package org.denooze.plugins.steps.cmisput;
 
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Properties;
 
 import org.apache.chemistry.opencmis.client.api.Document;
 import org.apache.chemistry.opencmis.client.api.ObjectId;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
+import org.apache.commons.vfs.FileObject;
+import org.apache.commons.vfs.provider.local.LocalFile;
 import org.eclipse.swt.widgets.TableItem;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowDataUtil;
+import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -113,7 +120,7 @@ public class CmisPut extends BaseStep implements StepInterface
 				throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.RepositoryLoginIncomplete")); //$NON-NLS-1$
 			}
 
-			if (checkrow(r)){
+			if (checkrow(r,getTransMeta())){
 				/* get index of fields in row layout.*/
 				data.filenamefieldid = getInputRowMeta().indexOfValue(meta.getFilenamefield());
 				if (data.filenamefieldid<0) 
@@ -148,7 +155,7 @@ public class CmisPut extends BaseStep implements StepInterface
 				if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateToPathOK",CmisConnector.getLastCreatedDynPath())); //$NON-NLS-1$				
 			  }
 		}
-		if (checkrow(r)){
+		if (checkrow(r,getTransMeta())){
 			/* add properties*/
 			CmisConnector.removeDocumentproperties();
 			if (meta.getDocumentPropertyFieldName()!=null) {
@@ -158,46 +165,49 @@ public class CmisPut extends BaseStep implements StepInterface
 				}
 			}
 			/* create document*/
-			CmisDoc = CmisConnector.getDocumentByPath(r[data.filenamefieldid].toString());
+			String filenamefield = environmentSubstitute(r[data.filenamefieldid].toString());
+			String documentfield = environmentSubstitute(r[data.documentfieldid].toString());
+			CmisDoc = CmisConnector.getDocumentByPath(filenamefield);
 			if (CmisDoc!=null){
 				/* Document exists */
-				if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.DocExists",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString())); //$NON-NLS-1$
+				if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.DocExists",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
 				/* Check if document is versionable */
 				if (CmisConnector.DocumentIsVersionable(CmisDoc)){
-					if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.DocIsVersionable",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString())); //$NON-NLS-1$
+					if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.DocIsVersionable",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
 					if (!CmisConnector.DocumentIsCheckOut(CmisDoc)){
 						CmisDocId = CmisConnector.CheckOutDocument(CmisDoc);
 						if (CmisDocId!=null) {
 							/* A versionable document needs to be checked out before a new version can be checked in */
-							if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CheckOutDocumentOK",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString())); //$NON-NLS-1$
-							if (CmisConnector.CheckInDocument(CmisDocId,meta.getDocumentType(),(String)r[data.filenamefieldid],(String)r[data.documentfieldid],BaseMessages.getString(PKG, "CmisPut.Info.Comment"))){
-								if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CheckInDocumentOK",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString())); //$NON-NLS-1$
+							if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CheckOutDocumentOK",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
+							if (CmisConnector.CheckInDocument(CmisDocId,meta.getDocumentType(),filenamefield,documentfield,BaseMessages.getString(PKG, "CmisPut.Info.Comment"),getTransMeta())){
+								if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CheckInDocumentOK",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
 							} else {
-								throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCheckingInDocument",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString(),CmisConnector.getMsgError())); //$NON-NLS-1$
+								CmisConnector.CancelCheckOutDocument(CmisDocId);
+								throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCheckingInDocument",CmisConnector.getLastCreatedDynPath(),filenamefield,CmisConnector.getMsgError())); //$NON-NLS-1$
 							}
 						} else {
-							throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCheckingOutDocument",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString(),CmisConnector.getMsgError())); //$NON-NLS-1$
+							throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCheckingOutDocument",CmisConnector.getLastCreatedDynPath(),filenamefield,CmisConnector.getMsgError())); //$NON-NLS-1$
 						}
 					} else {
-						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.DocumentAlreadyCheckedOut",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString(),CmisConnector.getMsgError())); //$NON-NLS-1$
+						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.DocumentAlreadyCheckedOut",CmisConnector.getLastCreatedDynPath(),filenamefield,CmisConnector.getMsgError())); //$NON-NLS-1$
 					}
 				} else { /* document is not versionable */
-					if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.DocIsNotVersionable",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString())); //$NON-NLS-1$
+					if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.DocIsNotVersionable",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
 					
 				}
 			} else {
 				/* document is new */
-				if (!CmisConnector.CreateDocument(meta.getDocumentType(),(String)r[data.filenamefieldid],(String)r[data.documentfieldid])){
+				if (!CmisConnector.CreateDocument(meta.getDocumentType(),filenamefield,documentfield,getTransMeta())){
 					if (meta.HasVariablePath()==true) {
-						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingDocument",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString(),CmisConnector.getMsgError())); //$NON-NLS-1$
+						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingDocument",CmisConnector.getLastCreatedDynPath(),filenamefield,CmisConnector.getMsgError())); //$NON-NLS-1$
 					} else {
-						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingDocument",meta.getToPath(),r[data.filenamefieldid].toString(),CmisConnector.getMsgError())); //$NON-NLS-1$
+						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingDocument",meta.getToPath(),filenamefield,CmisConnector.getMsgError())); //$NON-NLS-1$
 					}
 				} else {
 					if (meta.HasVariablePath()==true) {
-						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateDocumentOK",CmisConnector.getLastCreatedDynPath(),r[data.filenamefieldid].toString())); //$NON-NLS-1$
+						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateDocumentOK",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
 					} else {
-						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateDocumentOK",meta.getToPath(),r[data.filenamefieldid].toString())); //$NON-NLS-1$	
+						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateDocumentOK",meta.getToPath(),filenamefield)); //$NON-NLS-1$	
 					}
 				  }
 			}			
@@ -216,9 +226,25 @@ public class CmisPut extends BaseStep implements StepInterface
 		return true;
 	}
 
-	private boolean checkrow(Object[] r) {
-		/*TODO check for empty sourcefile*/
-		/*TODO check validity of the value of a property -  can be restricted to a list.*/
+	private boolean checkrow(Object[] r, TransMeta transmeta) throws KettleException {
+		String sourcefile = environmentSubstitute((String)r[data.documentfieldid]);
+		
+		FileObject fileObject = KettleVFS.getFileObject(sourcefile, transmeta);
+		if (!(fileObject instanceof LocalFile)) {
+			// We can only use NIO on local files at the moment, so that's what we limit ourselves to.
+			//
+			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Log.OnlyLocalFilesAreSupported")); //$NON-NLS-1$
+		}
+		FileInputStream file;
+		try {
+			file = new FileInputStream(KettleVFS.getFilename(fileObject));
+			file.close();
+		} catch (FileNotFoundException e) {
+			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotFound",sourcefile)); //$NON-NLS-1$
+		} catch (IOException e) {
+			// should never occur
+			e.printStackTrace();
+		}		
 		return true;
 	}
 
