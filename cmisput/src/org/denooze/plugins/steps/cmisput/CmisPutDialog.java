@@ -158,6 +158,10 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 	private TableView    wDynDirStruct;
 	private FormData     fdlDynDirStruct, fdDynDirStruct;
 	
+	private Label        wlAspectListStruct;
+	private TableView    wAspectListStruct;
+	private FormData     fdlAspectListStruct, fdAspectListStruct;
+	
 	private Label		 wlGetDocumentProperties; 
 	private Button		 wGetDocumentProperties;
 	private Listener	 lsGetDocumentProperties;
@@ -176,7 +180,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
     
     private Map<String, Integer> inputFields;
 	
-    private ColumnInfo[] colinf,dyndirstructcolinf;
+    private ColumnInfo[] colinf,dyndirstructcolinf,aspectliststructcolinf;
 	
 	private CmisPutMeta input;
 	
@@ -603,6 +607,39 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
             }
         }
     );
+        
+        /* Table for dynamic directory structure */
+        wlAspectListStruct=new Label(wDocTypeGroup, SWT.RIGHT);
+        wlAspectListStruct.setText(BaseMessages.getString(PKG, "CmisPutDialog.AspectList.Label")); //$NON-NLS-1$
+        props.setLook(wlAspectListStruct);
+        fdlAspectListStruct=new FormData();
+        fdlAspectListStruct.left = new FormAttachment(0, 0);
+        fdlAspectListStruct.top  = new FormAttachment(wDocumentType, margin);
+        fdlAspectListStruct.right= new FormAttachment(middle, -margin);
+        wlAspectListStruct.setLayoutData(fdlAspectListStruct);
+        
+        final int AspectListStructFieldsRows=0;
+     	
+     	aspectliststructcolinf=new ColumnInfo[] { 
+     	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.AspectList.ColumnInfo.DirName"), ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
+     	  /*TODO make list of dirTypes dynamic.*/
+        };
+     		
+     	wAspectListStruct=new TableView(transMeta, wDocTypeGroup, 
+     							  SWT.BORDER | SWT.FULL_SELECTION | SWT.MULTI, 
+     							 aspectliststructcolinf, 
+     							  AspectListStructFieldsRows,  
+     							  lsMod,
+     							  props
+     							  );
+
+     	fdAspectListStruct=new FormData();
+     	fdAspectListStruct.left  = new FormAttachment(middle, 0);
+     	fdAspectListStruct.top   = new FormAttachment(wDocumentType, margin);
+     	fdAspectListStruct.right = new FormAttachment(100, 0);
+     	fdAspectListStruct.bottom= new FormAttachment(wDocumentType, 100);
+     	wAspectListStruct.setLayoutData(fdAspectListStruct);
+        
         /* Group Document */
         wDocumentGroup = new Group(wDocumentComp, SWT.SHADOW_NONE);
 		props.setLook(wDocumentGroup);
@@ -915,7 +952,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
      	fdDynDirStruct.left  = new FormAttachment(middle, 0);
      	fdDynDirStruct.top   = new FormAttachment(wToPath, margin);
      	fdDynDirStruct.right = new FormAttachment(100, 0);
-     	fdDynDirStruct.bottom= new FormAttachment(wToPath, 150);
+     	fdDynDirStruct.bottom= new FormAttachment(wToPath, 100);
      	wDynDirStruct.setLayoutData(fdDynDirStruct);
 
   
@@ -1043,6 +1080,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
                                  inputFields.put(row.getValueMeta(i).getName(), Integer.valueOf(i));
                              }
                              setComboBoxes();
+                             fillAspectList();
                          }
                          catch(KettleException e)
                          {
@@ -1204,6 +1242,36 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
         dyndirstructcolinf[0].setComboValues(fieldNames);
 	}
 
+
+	protected void fillAspectList(){
+
+		final Map<String, Integer> fields = new HashMap<String, Integer>();
+		final Properties props = new Properties();
+		Map<String, Integer> tmp = new HashMap<String, Integer>();
+		
+		props.setProperty("cms.url", transMeta.environmentSubstitute(wUrl.getText()));
+		props.setProperty("cms.password", transMeta.environmentSubstitute(wPassword.getText()));
+		props.setProperty("cms.username", transMeta.environmentSubstitute(wUsername.getText()));
+		
+		if (CmisConnector.getSession()==null){
+				CmisConnector.setCmsProperties(props);
+				CmisConnector.initCmisSession();
+			}
+		if (CmisConnector.getSession()==null){
+			tmp = CmisConnector.GetAspectList();
+		}
+        // Add the aspect names...
+        fields.putAll(tmp);
+        
+        Set<String> keySet = fields.keySet();
+        List<String> entries = new ArrayList<String>(keySet);
+
+        String fieldNames[] = (String[]) entries.toArray(new String[entries.size()]);
+
+        Const.sortStrings(fieldNames);
+		aspectliststructcolinf[0].setComboValues(fieldNames);
+    }
+    
 	protected void setCmisDialogProperties() {
 		/*TODO .....shell */
 	}

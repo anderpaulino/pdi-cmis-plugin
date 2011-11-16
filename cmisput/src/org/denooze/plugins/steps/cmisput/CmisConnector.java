@@ -52,6 +52,7 @@ import org.apache.chemistry.opencmis.client.bindings.CmisBindingFactory;
 import org.apache.chemistry.opencmis.client.runtime.SessionFactoryImpl;
 import org.apache.chemistry.opencmis.commons.PropertyIds;
 import org.apache.chemistry.opencmis.commons.SessionParameter;
+import org.apache.chemistry.opencmis.commons.data.CmisExtensionElement;
 import org.apache.chemistry.opencmis.commons.data.ContentStream;
 import org.apache.chemistry.opencmis.commons.data.RepositoryInfo;
 import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
@@ -88,7 +89,7 @@ public class CmisConnector implements Cloneable
 {
 	
 	private Properties cmsProperties;
-    private Session session;
+    private static Session session;
     private Iterable<Repository> repolist;
     private String msgError;
     private String localNameSpaceFilter;
@@ -424,6 +425,34 @@ public class CmisConnector implements Cloneable
 				GetFolderTypeList(wDocumentType,objectType.getId());
 			}
 		}
+	}
+	
+	public Map<String, Integer> GetAspectList(){
+
+		final Map<String, Integer> fields = new HashMap<String, Integer>();
+		
+		ObjectType type = session.getTypeDefinition("D:erp:document");
+//		ObjectType type = session.getTypeDefinition("P:erp:invoiceAspect");
+		Collection<PropertyDefinition<?>> properties = type.getPropertyDefinitions().values();
+		for (PropertyDefinition<?> propertyDefinition : properties) {
+			if (propertyDefinition.getLocalNamespace().equals(type.getLocalNamespace())){
+//				System.out.println(propertyDefinition.getId());
+//				System.out.println(propertyDefinition.getPropertyType());
+				if (propertyDefinition.getExtensions() != null){
+					List<CmisExtensionElement> choices = propertyDefinition.getExtensions();
+					for (int i = 0; i < choices.size(); i++) {
+						List<CmisExtensionElement> list = propertyDefinition.getExtensions().get(i).getChildren();
+						for (CmisExtensionElement cmisExtensionElement : list) {
+//							System.out.println("Choice "+ i + " :" + cmisExtensionElement.getValue());
+							fields.put(cmisExtensionElement.getValue(), i);
+						}
+					}
+				}
+			}		
+		}
+		/*TODO fix bug, so adding this line is not needed*/
+		fields.put("P:erp:invoiceAspect", 0);
+		return fields;
 	}
 	
 	public Boolean CreateDynPathIfNotExists(String topath, Object[] r, int[] folderArgumentIndexes, String[] object_type_id){
