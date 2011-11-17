@@ -1080,7 +1080,6 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
                                  inputFields.put(row.getValueMeta(i).getName(), Integer.valueOf(i));
                              }
                              setComboBoxes();
-                             fillAspectList();
                          }
                          catch(KettleException e)
                          {
@@ -1167,7 +1166,13 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 	protected void GetDocumentProperties(Shell shell) {
         Cursor busy = new Cursor(shell.getDisplay(), SWT.CURSOR_WAIT);
 		shell.setCursor(busy);
-		CmisConnector.setCmisDialogProperties(wMetaDataList,input.getDocumentType());
+		CmisConnector.setCmisDialogProperties(wMetaDataList,input.getDocumentType(),true);
+		if (input.getDocumentAspectName()!=null) {
+			for (int i=0;i<input.getDocumentAspectName().length;i++)
+			{
+				CmisConnector.setCmisDialogProperties(wMetaDataList,input.getDocumentAspectName()[i],false);
+			}
+		}		
         shell.setCursor(null);
 	}
 
@@ -1246,18 +1251,10 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 	protected void fillAspectList(){
 
 		final Map<String, Integer> fields = new HashMap<String, Integer>();
-		final Properties props = new Properties();
 		Map<String, Integer> tmp = new HashMap<String, Integer>();
 		
-		props.setProperty("cms.url", transMeta.environmentSubstitute(wUrl.getText()));
-		props.setProperty("cms.password", transMeta.environmentSubstitute(wPassword.getText()));
-		props.setProperty("cms.username", transMeta.environmentSubstitute(wUsername.getText()));
-		
-		if (CmisConnector.getSession()==null){
-				CmisConnector.setCmsProperties(props);
-				CmisConnector.initCmisSession();
-			}
-		if (CmisConnector.getSession()==null){
+//		if (CmisConnector.getSession()!=null)
+		{
 			tmp = CmisConnector.GetAspectList();
 		}
         // Add the aspect names...
@@ -1272,9 +1269,9 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 		aspectliststructcolinf[0].setComboValues(fieldNames);
     }
     
-	protected void setCmisDialogProperties() {
-		/*TODO .....shell */
-	}
+//	protected void setCmisDialogProperties() {
+//		/*TODO .....shell */
+//	}
 
 	/**
 	 * Copy information from the meta-data input to the dialog fields.
@@ -1310,7 +1307,14 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 				if(input.getFolderArgumentFolderType()[i] != null) item.setText(2, Const.NVL(input.getFolderArgumentFolderType()[i], ""));
 			}
 		}
-	    
+	    if (input.getDocumentAspectName()!=null) {
+			for (int i=0;i<input.getDocumentAspectName().length;i++)
+			{
+				TableItem item = wAspectListStruct.table.getItem(i);
+				//TODO fix the error
+				if(input.getDocumentAspectName()[i] != null) item.setText(1, Const.NVL(input.getDocumentAspectName()[i], ""));
+			}
+		}
 		if (input.getDocumentPropertyFieldName()!=null) {
 			for (int i=0;i<input.getDocumentPropertyFieldName().length;i++)
 			{
@@ -1341,6 +1345,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 			} else {
 				enableRepoConfigElements();
 			    SetRepositoryInfo();
+                fillAspectList();
 			}
 		} else {
 			disableRepoConfigElements();
@@ -1396,9 +1401,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 		input.setCmisidfield(wCmisIdField.getText());
 		
 		int nrfolderargs = wDynDirStruct.nrNonEmpty();
-		
 		input.allocatefolder(nrfolderargs);
-
 		if(isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPutDialog.Log.FoundFolders",String.valueOf(nrfolderargs))); //$NON-NLS-1$ //$NON-NLS-2$
 		for (int i=0;i<nrfolderargs;i++)
 		{
@@ -1406,9 +1409,17 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 			input.setFolderArgumentField(i,item.getText(1));
 			input.setFolderArgumentFolderType(i,item.getText(2));
 		}
+
+		int nraspectargs = wAspectListStruct.nrNonEmpty();
+		input.allocateaspect(nraspectargs);
+		if(isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPutDialog.Log.FoundAspects",String.valueOf(nraspectargs))); //$NON-NLS-1$ //$NON-NLS-2$
+		for (int i=0;i<nraspectargs;i++)
+		{
+			TableItem item = wAspectListStruct.getNonEmpty(i);
+			input.setDocumentAspectName(i,item.getText(1));
+		}
 		
 		int nrargs = wMetaDataList.nrNonEmpty();
-		
 		input.allocate(nrargs);
 		if(isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPutDialog.Log.FoundProperties",String.valueOf(nrargs))); //$NON-NLS-1$ //$NON-NLS-2$
 		for (int i=0;i<nrargs;i++)
