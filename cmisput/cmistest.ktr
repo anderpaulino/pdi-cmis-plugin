@@ -194,7 +194,7 @@
            <schema_name/>
            </partitioning>
     <url>http:&#47;&#47;bealfrescotest&#47;alfresco&#47;service&#47;cmis</url>
-    <repository>e168ad08-af18-4228-9d74-d2c8f6c01ce2</repository>
+    <repository>18b58c5d-3c2d-494d-a60a-498b24af5665</repository>
     <standard>Alfresco CMIS</standard>
     <username>begunrom</username>
     <password>pattaya1210</password>
@@ -214,6 +214,9 @@
         <folderfield>property2</folderfield>
         <foldertype>cmis:folder</foldertype>
       </folderarg>
+      <aspectarg>
+        <aspectname>P:cmc:bpAspect</aspectname>
+      </aspectarg>
       <documentarg>
         <propertyfieldname>erpdocumenttype</propertyfieldname>
         <propertyname>erp:documentType</propertyname>

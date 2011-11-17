@@ -144,7 +144,9 @@ public class CmisPut extends BaseStep implements StepInterface
 	        		}
 				}
 			}
-			       	
+			//TODO -get the predefined values for properties if any present, so a check can be done
+			//GetPropertiesValueList();
+			
 			first=false;
         }
 		
@@ -167,6 +169,14 @@ public class CmisPut extends BaseStep implements StepInterface
 			/* create document*/
 			String filenamefield = environmentSubstitute(r[data.filenamefieldid].toString());
 			String documentfield = environmentSubstitute(r[data.documentfieldid].toString());
+			String documentType = meta.getDocumentType();
+			if (meta.getDocumentAspectName()!=null) {
+				for (int i=0;i<meta.getDocumentAspectName().length;i++)
+				{
+					documentType = documentType + "," + meta.getDocumentAspectName()[i];
+				}
+			}
+			if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.DocumentType",documentType)); //$NON-NLS-1$
 			CmisDoc = CmisConnector.getDocumentByPath(filenamefield);
 			if (CmisDoc!=null){
 				/* Document exists */
@@ -179,7 +189,7 @@ public class CmisPut extends BaseStep implements StepInterface
 						if (CmisDocId!=null) {
 							/* A versionable document needs to be checked out before a new version can be checked in */
 							if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CheckOutDocumentOK",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
-							if (CmisConnector.CheckInDocument(CmisDocId,meta.getDocumentType(),filenamefield,documentfield,BaseMessages.getString(PKG, "CmisPut.Info.Comment"),getTransMeta())){
+							if (CmisConnector.CheckInDocument(CmisDocId,documentType,filenamefield,documentfield,BaseMessages.getString(PKG, "CmisPut.Info.Comment"),getTransMeta())){
 								if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CheckInDocumentOK",CmisConnector.getLastCreatedDynPath(),filenamefield)); //$NON-NLS-1$
 							} else {
 								CmisConnector.CancelCheckOutDocument(CmisDocId);
@@ -197,7 +207,7 @@ public class CmisPut extends BaseStep implements StepInterface
 				}
 			} else {
 				/* document is new */
-				if (!CmisConnector.CreateDocument(meta.getDocumentType(),filenamefield,documentfield,getTransMeta())){
+				if (!CmisConnector.CreateDocument(documentType,filenamefield,documentfield,getTransMeta())){
 					if (meta.HasVariablePath()==true) {
 						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingDocument",CmisConnector.getLastCreatedDynPath(),filenamefield,CmisConnector.getMsgError())); //$NON-NLS-1$
 					} else {

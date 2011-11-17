@@ -94,6 +94,9 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
     
     /** hasvariablepath  */
     private Boolean  hasvariablepath;
+
+    /** function arguments : documentPropertyFieldName*/
+    private String  documentAspectName[];
     
     /** function arguments : documentPropertyFieldName*/
     private String  documentPropertyFieldName[];
@@ -139,6 +142,21 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 		this.standard = standard;
 	}
 	
+	/**
+     * @return Returns the argument.
+     */
+    public String[] getDocumentAspectName()
+    {
+        return documentAspectName;
+    }
+
+    /**
+     * @param argument The argument to set.
+     */
+    public void setDocumentAspectName(int i,String documentAspectName)
+    {
+        this.documentAspectName[i] = documentAspectName;
+    }
 	/**
      * @return Returns the argument.
      */
@@ -418,6 +436,13 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
             retval.append("        ").append(XMLHandler.addTagValue("foldertype", folderArgumentFolderType[i])); //$NON-NLS-1$ //$NON-NLS-2$
             retval.append("      </folderarg>").append(Const.CR); //$NON-NLS-1$
         }
+        // Aspects
+        for (int i = 0; i < documentAspectName.length; i++)
+        {
+            retval.append("      <aspectarg>").append(Const.CR); //$NON-NLS-1$
+            retval.append("        ").append(XMLHandler.addTagValue("aspectname", documentAspectName[i])); //$NON-NLS-1$ //$NON-NLS-2$
+            retval.append("      </aspectarg>").append(Const.CR); //$NON-NLS-1$
+        }
         
         for (int i = 0; i < documentPropertyFieldName.length; i++)
         {
@@ -438,7 +463,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 	
 	private void readData(Node stepnode)
 	{
-        int nrargs,nrfolderargs;
+        int nrargs,nrfolderargs,nraspectargs;
 
         url = XMLHandler.getTagValue(stepnode, "url"); //$NON-NLS-1$
         repository = XMLHandler.getTagValue(stepnode, "repository");
@@ -459,9 +484,9 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
         
         
         Node lookup = XMLHandler.getSubNode(stepnode, "metadata"); //$NON-NLS-1$
+        //folders
         nrfolderargs = XMLHandler.countNodes(lookup, "folderarg"); //$NON-NLS-1$
         allocatefolder(nrfolderargs);
-
         for (int i = 0; i < nrfolderargs; i++)
         {
             Node anode = XMLHandler.getSubNodeByNr(lookup, "folderarg", i); //$NON-NLS-1$
@@ -469,9 +494,18 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
             folderArgumentField[i] = XMLHandler.getTagValue(anode, "folderfield"); //$NON-NLS-1$
             folderArgumentFolderType[i] = XMLHandler.getTagValue(anode, "foldertype"); //$NON-NLS-1$
         }
+        //Aspects
+        nraspectargs = XMLHandler.countNodes(lookup, "aspectarg"); //$NON-NLS-1$
+        allocateaspect(nraspectargs);
+        for (int i = 0; i < nraspectargs; i++)
+        {
+            Node anode = XMLHandler.getSubNodeByNr(lookup, "aspectarg", i); //$NON-NLS-1$
+
+            documentAspectName[i] = XMLHandler.getTagValue(anode, "aspectname"); //$NON-NLS-1$
+        }
+        //properties
         nrargs = XMLHandler.countNodes(lookup, "documentarg"); //$NON-NLS-1$
         allocate(nrargs);
-
         for (int i = 0; i < nrargs; i++)
         {
             Node anode = XMLHandler.getSubNodeByNr(lookup, "documentarg", i); //$NON-NLS-1$
@@ -565,6 +599,11 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 		documentPropertyDocumentType = new String[nrargs];
     }
 
+	public void allocateaspect(int nrargs)
+    {
+		documentAspectName = new String[nrargs];
+    }
+	
 	public void allocatefolder(int nrargs)
     {
         folderArgumentField = new String[nrargs];

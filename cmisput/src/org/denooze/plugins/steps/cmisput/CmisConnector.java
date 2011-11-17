@@ -430,6 +430,21 @@ public class CmisConnector implements Cloneable
 	public Map<String, Integer> GetAspectList(){
 
 		final Map<String, Integer> fields = new HashMap<String, Integer>();
+		int i = 0;
+		
+		ItemIterable<ObjectType> aspects = session.getTypeChildren("cmis:policy", false);
+		for (ObjectType objectType3 : aspects) {
+			System.out.println(objectType3.getId());
+			fields.put(objectType3.getId(),i);
+			i+=1;
+		}
+		return fields;
+	}
+	
+
+	public Map<String, Integer> GetPropertiesValueList(){
+
+		final Map<String, Integer> fields = new HashMap<String, Integer>();
 		
 		ObjectType type = session.getTypeDefinition("D:erp:document");
 //		ObjectType type = session.getTypeDefinition("P:erp:invoiceAspect");
@@ -450,8 +465,6 @@ public class CmisConnector implements Cloneable
 				}
 			}		
 		}
-		/*TODO fix bug, so adding this line is not needed*/
-		fields.put("P:erp:invoiceAspect", 0);
 		return fields;
 	}
 	
@@ -603,7 +616,7 @@ public class CmisConnector implements Cloneable
 		return true;
 	}
 	/**
-	 * @return if the document is versionable
+	 * @return if the document is checked out
 	 */
 	public Boolean DocumentIsCheckOut(Document CmisDoc) {
 		/*TODO implement check */
@@ -735,10 +748,12 @@ public class CmisConnector implements Cloneable
 	}
 	
 
-	public void setCmisDialogProperties(TableView wMetaDataList,String documenttype) {
-		int i=0;
+	public void setCmisDialogProperties(TableView wMetaDataList,String documenttype,Boolean remove) {
+		int i=wMetaDataList.table.getItemCount();
 		//not possible for properties in an aspect
-		wMetaDataList.removeAll();
+		if (remove ) {
+			wMetaDataList.removeAll();
+		}
 		while ((documenttype!=null) && (!documenttype.isEmpty())){
 			ItemIterable<ObjectType> types = session.getTypeChildren(documenttype, true); 
 			for( ObjectType type2 : types) { 
@@ -759,15 +774,14 @@ public class CmisConnector implements Cloneable
 							item.setText(5, Const.NVL(propertyDefinition.getLocalName(), ""));
 							item.setText(6, Const.NVL(documenttype, ""));
 						}
-					}
-					
+					}	
 				} 					     
-			}
+			}			
 			/* get the parent document type */
 			documenttype = session.getTypeDefinition(documenttype).getParentType().getId();
-			if (documenttype.equals("cmis:document")){
+			if ((documenttype.equals("cmis:document")) || (documenttype.equals("cmis:policy"))){
 				documenttype = null;
-			}
-		}	
-	}
+				}
+		}
+	}	
 }
