@@ -428,7 +428,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
         retval.append("    " + XMLHandler.addTagValue("cmisidfield",cmisidfield ));
         
         retval.append("    <metadata>").append(Const.CR); //$NON-NLS-1$
-
+        //folders
         for (int i = 0; i < folderArgumentField.length; i++)
         {
             retval.append("      <folderarg>").append(Const.CR); //$NON-NLS-1$
@@ -443,7 +443,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
             retval.append("        ").append(XMLHandler.addTagValue("aspectname", documentAspectName[i])); //$NON-NLS-1$ //$NON-NLS-2$
             retval.append("      </aspectarg>").append(Const.CR); //$NON-NLS-1$
         }
-        
+        //properties
         for (int i = 0; i < documentPropertyFieldName.length; i++)
         {
             retval.append("      <documentarg>").append(Const.CR); //$NON-NLS-1$
