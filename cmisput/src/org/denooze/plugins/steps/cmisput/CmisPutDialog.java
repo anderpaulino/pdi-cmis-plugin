@@ -1166,11 +1166,11 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 	protected void GetDocumentProperties(Shell shell) {
         Cursor busy = new Cursor(shell.getDisplay(), SWT.CURSOR_WAIT);
 		shell.setCursor(busy);
-		CmisConnector.setCmisDialogProperties(wMetaDataList,input.getDocumentType(),true);
+		CmisConnector.setCmisDialogProperties(wMetaDataList,input.getDocumentType());
 		if (input.getDocumentAspectName()!=null) {
 			for (int i=0;i<input.getDocumentAspectName().length;i++)
 			{
-				CmisConnector.setCmisDialogProperties(wMetaDataList,input.getDocumentAspectName()[i],false);
+				CmisConnector.setCmisDialogAspectProperties(wMetaDataList,input.getDocumentAspectName()[i]);
 			}
 		}		
         shell.setCursor(null);
