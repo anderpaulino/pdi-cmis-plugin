@@ -748,12 +748,10 @@ public class CmisConnector implements Cloneable
 	}
 	
 
-	public void setCmisDialogProperties(TableView wMetaDataList,String documenttype,Boolean remove) {
-		int i=wMetaDataList.table.getItemCount();
-		//not possible for properties in an aspect
-		if (remove ) {
-			wMetaDataList.removeAll();
-		}
+	public void setCmisDialogProperties(TableView wMetaDataList,String documenttype) {
+		int i=0;
+		wMetaDataList.removeAll();
+		
 		while ((documenttype!=null) && (!documenttype.isEmpty())){
 			ItemIterable<ObjectType> types = session.getTypeChildren(documenttype, true); 
 			for( ObjectType type2 : types) { 
@@ -782,6 +780,30 @@ public class CmisConnector implements Cloneable
 			if ((documenttype.equals("cmis:document")) || (documenttype.equals("cmis:policy"))){
 				documenttype = null;
 				}
+		}
+		
+	}	public void setCmisDialogAspectProperties(TableView wMetaDataList,String documenttype) {
+		int i=wMetaDataList.table.getItemCount();
+		
+		ObjectType type2 = session.getTypeDefinition(documenttype);
+		Map<String, PropertyDefinition<?>> properties = type2.getPropertyDefinitions();
+		for (Map.Entry<String,PropertyDefinition<?>> entry : properties.entrySet()) {
+			PropertyDefinition<?> propertyDefinition = entry.getValue();
+			if(!(propertyDefinition.getId().equals(PropertyIds.NAME)) && !(propertyDefinition.getId().equals(PropertyIds.OBJECT_TYPE_ID))){
+				propertyDefinition.getUpdatability();
+				if(propertyDefinition.getUpdatability()!=Updatability.READONLY){
+					/* skip name, because already defined elsewhere & object id */
+					wMetaDataList.table.setItemCount(i+1);
+					TableItem item = wMetaDataList.table.getItem(i);
+					i+=1;
+					item.setText(0, Integer.toString(i));
+					item.setText(2, Const.NVL(propertyDefinition.getId(), ""));
+					item.setText(3, Const.NVL(propertyDefinition.getUpdatability().name(), ""));
+					item.setText(4, Const.NVL(propertyDefinition.getCardinality().name(), ""));
+					item.setText(5, Const.NVL(propertyDefinition.getLocalName(), ""));
+					item.setText(6, Const.NVL(documenttype, ""));
+				}
+			}	
 		}
 	}	
 }

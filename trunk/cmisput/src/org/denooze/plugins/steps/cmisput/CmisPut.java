@@ -132,6 +132,7 @@ public class CmisPut extends BaseStep implements StepInterface
         		{
         			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.DocumentFieldNotFound",meta.getDocumentField())); //$NON-NLS-1$
         		}
+				//folders
 				data.folderArgumentIndexes = new int[meta.getFolderArgumentField().length];
 				for (int i=0;i<data.folderArgumentIndexes.length;i++) {
 					data.folderArgumentIndexes[i] = getInputRowMeta().indexOfValue(meta.getFolderArgumentField()[i]);
@@ -141,6 +142,18 @@ public class CmisPut extends BaseStep implements StepInterface
 	        		}
 	        		if ((meta.getFolderArgumentFolderType()[i]==null)||(meta.getFolderArgumentFolderType()[i].length()==0)){
 	        			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.FolderTypeNotFound")); //$NON-NLS-1$
+	        		}
+				}
+				//aspects
+				data.propertiesArgumentIndexes = new int[meta.getDocumentPropertyFieldName().length];
+				for (int i=0;i<data.propertiesArgumentIndexes.length;i++) {
+					data.propertiesArgumentIndexes[i] = getInputRowMeta().indexOfValue(meta.getDocumentPropertyFieldName()[i]);
+	        		if (data.propertiesArgumentIndexes[i]<0) 
+	        		{
+	        			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.FieldNotFound",meta.getDocumentPropertyFieldName()[i])); //$NON-NLS-1$
+	        		}
+	        		if ((meta.getDocumentPropertyFieldName()[i]==null)||(meta.getDocumentPropertyFieldName()[i].length()==0)){
+	        			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.PropertyNotFound")); //$NON-NLS-1$
 	        		}
 				}
 			}
@@ -163,7 +176,7 @@ public class CmisPut extends BaseStep implements StepInterface
 			if (meta.getDocumentPropertyFieldName()!=null) {
 				for (int i=0;i<meta.getDocumentPropertyFieldName().length;i++)
 				{
-					CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],"Invoice");
+					CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],r[data.propertiesArgumentIndexes[i]].toString());
 				}
 			}
 			/* create document*/

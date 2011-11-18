@@ -37,6 +37,8 @@ public class CmisPutData extends BaseStepData implements StepDataInterface
 	
 	/*array of indexes of folder arguments */
 	public int[]  folderArgumentIndexes;
+	/*array of indexes of folder arguments */
+	public int[]  propertiesArgumentIndexes;
 	
 	/**
 	 * 
