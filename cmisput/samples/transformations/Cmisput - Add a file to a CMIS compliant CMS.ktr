@@ -197,7 +197,7 @@ Copies a jpg file into this folder.</note>
       </field>
     </fields>
     <data>
-      <line> <item>${Internal.Transformation.Filename.Directory}&#47;files&#47;GroupPicture.jpg</item><item>GroupPicture.jpg</item><item>Y</item><item>N</item><item>p1</item><item>folder1</item><item>p3</item><item>p4</item><item>Invoice</item> </line>
+      <line> <item>${Internal.Transformation.Filename.Directory}&#47;files&#47;Pentaho Community Gathering Portugal 2010.jpg</item><item>Pentaho Community Gathering Portugal 2010.jpg</item><item>Y</item><item>N</item><item>p1</item><item>folder1</item><item>p3</item><item>p4</item><item>Invoice</item> </line>
     </data>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
@@ -238,6 +238,9 @@ Copies a jpg file into this folder.</note>
         <folderfield>property2</folderfield>
         <foldertype>cmis:folder</foldertype>
       </folderarg>
+      <aspectarg>
+        <aspectname>P:exif:exif</aspectname>
+      </aspectarg>
     </metadata>
      <cluster_schema/>
  <remotesteps>   <input>   </input>   <output>   </output> </remotesteps>    <GUI>
