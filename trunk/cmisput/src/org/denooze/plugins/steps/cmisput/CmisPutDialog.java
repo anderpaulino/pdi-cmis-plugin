@@ -618,7 +618,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
         fdlAspectListStruct.right= new FormAttachment(middle, -margin);
         wlAspectListStruct.setLayoutData(fdlAspectListStruct);
         
-        final int AspectListStructFieldsRows=0;
+        final int AspectListStructFieldsRows=input.getDocumentAspectName().length;
      	
      	aspectliststructcolinf=new ColumnInfo[] { 
      	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.AspectList.ColumnInfo.DirName"), ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
@@ -932,7 +932,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
         wlDynDirStruct.setLayoutData(fdlDynDirStruct);
          
 //     	final int FieldsRows=input.getArgumentField().length;
-     	final int DynDirStructFieldsRows=0;
+     	final int DynDirStructFieldsRows=input.getFolderArgumentField().length;
      	
      	dyndirstructcolinf=new ColumnInfo[] { 
      	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.MetaDataList.ColumnInfo.DirName"), ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
@@ -995,7 +995,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 		wGetDocumentProperties.addListener(SWT.Selection, lsGetDocumentProperties );
      		
 //     	final int FieldsRows=input.getArgumentField().length;
-     	final int FieldsRows=0;
+     	final int FieldsRows=input.getDocumentPropertyFieldName().length;
      	
      	colinf=new ColumnInfo[] { 
      	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.MetaDataList.ColumnInfo.PropertyFieldName"),      ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, false),
