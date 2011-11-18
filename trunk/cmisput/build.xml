@@ -125,11 +125,6 @@
                 dir="${resources}/lib" 
                 includes="*.jar"/>
         </copy>
-        <copy todir="${distrib}/samples">
-            <fileset
-                dir="${samples}" 
-                includes="**/*"/>
-        </copy>
     	<!--
     	<copy todir="${deploydir}/lib">
     	        <fileset
@@ -147,7 +142,7 @@
 
     <target name="distrib" depends="cmisput" description="Create the distribution package..." >
         <echo>Copying libraries to distrib directory...</echo>
-        <copy todir="${distrib}">
+        <copy todir="${distrib}/plugins/steps/cmisput">
             <fileset
                 dir="${resources}" 
                 includes="plugin.xml,*.png"/>
@@ -155,7 +150,7 @@
                 dir="${lib}" 
                 includes="**/*.jar"/>
         </copy>
-        <copy todir="${distrib}/lib">
+        <copy todir="${distrib}/plugins/steps/cmisput/lib">
             <fileset
                 dir="${resources}/lib" 
                 includes="*.jar"/>
@@ -184,11 +179,6 @@
             <fileset
                 dir="${resources}/lib" 
                 includes="*.jar"/>
-        </copy>
-        <copy todir="${distrib}/samples">
-            <fileset
-                dir="${samples}" 
-                includes="**/*"/>
         </copy>
     	<!--
     	<copy todir="${deploydir}/lib">
