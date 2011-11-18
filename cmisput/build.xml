@@ -10,7 +10,8 @@
 	<property file="override.properties"/>
 	
     <!-- system properties to use -->
-    <property name= "cr" value="${line.separator}"/> 
+    <property name= "cr" 		value="${line.separator}"/> 
+    <property name="version"	value="1.0"/>
 
     <!-- set global properties for this build -->
 
@@ -21,7 +22,7 @@
     <property name="distrib"   location="distrib"/>
     <property name="libext"    location="libext"/>
     <property name="libswt"    location="libswt"/>
-    <property name="samples"    location="samples"/>
+    <property name="samples"   location="samples"/>
 	<!--
     <property name="cmisconnector"   location="../cmisget/distrib"/>
     -->
@@ -160,6 +161,14 @@
                 dir="${samples}" 
                 includes="**/*"/>
         </copy>
+        <delete file="${distrib}/*.zip"/>
+    	<delete>
+    	    <fileset dir="${distrib}" includes="*.zip"/>
+    	  </delete>
+    	<zip destfile="${distrib}/pdi-cmis-plugin-${version}.zip"
+    	       basedir="${distrib}"
+    	       update="true"
+    	  />
     </target>
 
     <!--
