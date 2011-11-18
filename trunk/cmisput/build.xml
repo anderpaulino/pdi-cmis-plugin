@@ -21,6 +21,7 @@
     <property name="distrib"   location="distrib"/>
     <property name="libext"    location="libext"/>
     <property name="libswt"    location="libswt"/>
+    <property name="samples"    location="samples"/>
 	<!--
     <property name="cmisconnector"   location="../cmisget/distrib"/>
     -->
@@ -124,6 +125,11 @@
                 dir="${resources}/lib" 
                 includes="*.jar"/>
         </copy>
+        <copy todir="${distrib}/samples">
+            <fileset
+                dir="${samples}" 
+                includes="**/*"/>
+        </copy>
     	<!--
     	<copy todir="${deploydir}/lib">
     	        <fileset
@@ -149,6 +155,16 @@
                 dir="${lib}" 
                 includes="**/*.jar"/>
         </copy>
+        <copy todir="${distrib}/lib">
+            <fileset
+                dir="${resources}/lib" 
+                includes="*.jar"/>
+        </copy>
+        <copy todir="${distrib}/samples">
+            <fileset
+                dir="${samples}" 
+                includes="**/*"/>
+        </copy>
     </target>
 
     <!--
@@ -168,6 +184,11 @@
             <fileset
                 dir="${resources}/lib" 
                 includes="*.jar"/>
+        </copy>
+        <copy todir="${distrib}/samples">
+            <fileset
+                dir="${samples}" 
+                includes="**/*"/>
         </copy>
     	<!--
     	<copy todir="${deploydir}/lib">
@@ -194,6 +215,7 @@
     <target name="clean"  description="clean up generated files" >
         <delete dir="${classes}"/>
         <delete dir="${lib}"/>
+        <delete dir="${distrib}"/>
     </target>
 
 </project>
