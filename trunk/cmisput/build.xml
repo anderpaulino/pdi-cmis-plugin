@@ -70,8 +70,8 @@
                 <fileset dir="${libswt}/win32/" includes="*.jar"/>
                 <fileset dir="${libext}/opencmis/" 		includes="*.jar"/>
                 <fileset dir="${libext}/alfresco/" 		includes="*.jar"/>
-                <fileset dir="${libext}/tika/" 		includes="*.jar"/>
             	<!--
+                <fileset dir="${libext}/tika/" 		includes="*.jar"/>
                 <fileset dir="${cmisconnector}" 		includes="*.jar"/>
                 -->
             </classpath>
