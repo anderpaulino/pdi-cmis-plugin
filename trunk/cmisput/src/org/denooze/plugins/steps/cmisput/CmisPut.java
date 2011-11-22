@@ -65,8 +65,10 @@ public class CmisPut extends BaseStep implements StepInterface
 		if (r==null)  // no more input to be expected...
 		{
 			setOutputDone();
-			if (CmisConnector.getSession()!=null) {
-				CmisConnector.clearSession();
+			if (CmisConnector!=null) {
+				if (CmisConnector.getSession()!=null) {
+					CmisConnector.clearSession();
+				}
 			}
 			return false;
 		}
@@ -120,7 +122,11 @@ public class CmisPut extends BaseStep implements StepInterface
 				throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.RepositoryLoginIncomplete")); //$NON-NLS-1$
 			}
 
-			if (checkrow(r,getTransMeta())){
+//			if (checkrow(r,getTransMeta())){
+			/* Check if not null*/
+			if (meta.getDocumentType()==null){
+    			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.DocumentTypeIsNull")); //$NON-NLS-1$
+			}
 				/* get index of fields in row layout.*/
 				data.filenamefieldid = getInputRowMeta().indexOfValue(meta.getFilenamefield());
 				if (data.filenamefieldid<0) 
@@ -156,7 +162,7 @@ public class CmisPut extends BaseStep implements StepInterface
 	        			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.PropertyNotFound")); //$NON-NLS-1$
 	        		}
 				}
-			}
+//			}
 			//TODO -get the predefined values for properties if any present, so a check can be done
 			//GetPropertiesValueList();
 			
@@ -250,9 +256,12 @@ public class CmisPut extends BaseStep implements StepInterface
 	}
 
 	private boolean checkrow(Object[] r, TransMeta transmeta) throws KettleException {
-		String sourcefile = environmentSubstitute((String)r[data.documentfieldid]);
+		Object[] r1 = r;
+		TransMeta t1 = transmeta;
 		
-		FileObject fileObject = KettleVFS.getFileObject(sourcefile, transmeta);
+		String sourcfile = environmentSubstitute((String)r[data.documentfieldid]);
+		
+		FileObject fileObject = KettleVFS.getFileObject(sourcfile, transmeta);
 		if (!(fileObject instanceof LocalFile)) {
 			// We can only use NIO on local files at the moment, so that's what we limit ourselves to.
 			//
@@ -263,7 +272,7 @@ public class CmisPut extends BaseStep implements StepInterface
 			file = new FileInputStream(KettleVFS.getFilename(fileObject));
 			file.close();
 		} catch (FileNotFoundException e) {
-			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotFound",sourcefile)); //$NON-NLS-1$
+			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotFound",sourcfile)); //$NON-NLS-1$
 		} catch (IOException e) {
 			// should never occur
 			e.printStackTrace();

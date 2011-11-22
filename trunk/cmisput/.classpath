@@ -8,11 +8,31 @@
 	<classpathentry kind="lib" path="libext/kettle-engine.jar" sourcepath="/Kettle trunk"/>
 	<classpathentry kind="lib" path="libext/kettle-ui-swt.jar"/>
 	<classpathentry kind="lib" path="libext/alfresco/alfresco-opencmis-extension-0.2.jar"/>
-	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-api-0.5.0.jar"/>
-	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-bindings-0.5.0.jar"/>
-	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-impl-0.5.0.jar"/>
-	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-api-0.5.0.jar"/>
-	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-impl-0.5.0.jar"/>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-api-0.5.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/cmisput/libext/opencmis/chemistry-opencmis-dist-0.5.0-docs.zip!/javadocs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-bindings-0.5.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/cmisput/libext/opencmis/chemistry-opencmis-dist-0.5.0-docs.zip!/javadocs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-client-impl-0.5.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/cmisput/libext/opencmis/chemistry-opencmis-dist-0.5.0-docs.zip!/javadocs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-api-0.5.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/cmisput/libext/opencmis/chemistry-opencmis-dist-0.5.0-docs.zip!/javadocs"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="libext/opencmis/chemistry-opencmis-commons-impl-0.5.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/cmisput/libext/opencmis/chemistry-opencmis-dist-0.5.0-docs.zip!/javadocs"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="libext/tika/tika-app-1.0.jar"/>
 	<classpathentry kind="lib" path="libext/mime-util-2.1.3.jar"/>
 	<classpathentry kind="lib" path="libext/kettle-vfs-20100924.jar"/>

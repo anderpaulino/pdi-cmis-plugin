@@ -127,6 +127,7 @@ public class CmisConnector implements Cloneable
 				parameter.put(SessionParameter.BINDING_TYPE, BindingType.ATOMPUB.value());
 				parameter.put(SessionParameter.REPOSITORY_ID, this.cmsProperties.getProperty("cms.repoId"));
 				parameter.put(SessionParameter.OBJECT_FACTORY_CLASS, "org.alfresco.cmis.client.impl.AlfrescoObjectFactoryImpl");
+//				parameter.put(SessionParameter.CLIENT_COMPRESSION, "true");
 
 			    CmisBindingFactory factory = CmisBindingFactory.newInstance();
 			    CmisBinding binding = factory.createCmisAtomPubBinding(parameter);
@@ -433,41 +434,21 @@ public class CmisConnector implements Cloneable
 		int i = 0;
 		
 		ItemIterable<ObjectType> aspects = session.getTypeChildren("cmis:policy", false);
-		for (ObjectType objectType3 : aspects) {
-			System.out.println(objectType3.getId());
-			fields.put(objectType3.getId(),i);
+		for (ObjectType objectType : aspects) {
+			String localNameSpace = objectType.getLocalNamespace();
+			if (!localNameSpaceFilter.isEmpty()){
+				if (localNameSpace.contains(localNameSpaceFilter)) {
+					fields.put(objectType.getId(),i);
+				}
+			} else {
+				fields.put(objectType.getId(),i);
+			}	
 			i+=1;
 		}
 		return fields;
 	}
 	
 
-	public Map<String, Integer> GetPropertiesValueList(){
-
-		final Map<String, Integer> fields = new HashMap<String, Integer>();
-		
-		ObjectType type = session.getTypeDefinition("D:erp:document");
-//		ObjectType type = session.getTypeDefinition("P:erp:invoiceAspect");
-		Collection<PropertyDefinition<?>> properties = type.getPropertyDefinitions().values();
-		for (PropertyDefinition<?> propertyDefinition : properties) {
-			if (propertyDefinition.getLocalNamespace().equals(type.getLocalNamespace())){
-//				System.out.println(propertyDefinition.getId());
-//				System.out.println(propertyDefinition.getPropertyType());
-				if (propertyDefinition.getExtensions() != null){
-					List<CmisExtensionElement> choices = propertyDefinition.getExtensions();
-					for (int i = 0; i < choices.size(); i++) {
-						List<CmisExtensionElement> list = propertyDefinition.getExtensions().get(i).getChildren();
-						for (CmisExtensionElement cmisExtensionElement : list) {
-//							System.out.println("Choice "+ i + " :" + cmisExtensionElement.getValue());
-							fields.put(cmisExtensionElement.getValue(), i);
-						}
-					}
-				}
-			}		
-		}
-		return fields;
-	}
-	
 	public Boolean CreateDynPathIfNotExists(String topath, Object[] r, int[] folderArgumentIndexes, String[] object_type_id){
 
 	    final Map<String, Object> properties = new HashMap<String, Object>();
@@ -520,16 +501,24 @@ public class CmisConnector implements Cloneable
 				topath = "/" + CurrentFolder;
 			}
 			AlfrescoFolder Folder = null;
-			try {
-				Folder = (AlfrescoFolder) getSession().getObjectByPath(topath);
-			} catch (CmisObjectNotFoundException e) {
+			Boolean Retry= true; 
+			Integer RetryCount = 0;/*If at the same time 2 copies of a step try to create a directory, do a retry */
+			while ((RetryCount <50) && (Retry)) {
+				RetryCount+=1;
 				try {
-					Folder = createFolder(parentFolder,CurrentFolder,properties,object_type_id);
-				} catch (Exception e1) {
-					setMsgError(e.getMessage());
-					return false;
-				}
-			}			
+					Folder = (AlfrescoFolder) getSession().getObjectByPath(topath);
+					Retry = false;
+				} catch (CmisObjectNotFoundException e) {
+					try {
+						Folder = createFolder(parentFolder,CurrentFolder,properties,object_type_id);
+						Retry = false;
+					} catch (Exception e1) {
+						setMsgError("Retry count = "+RetryCount+" Message = "+e.getMessage());
+						if (RetryCount == 49) return false;
+					}
+				}	
+			}
+					
 			parentFolder = Folder;
 			setLastCreatedDynPath(topath);
 		}
@@ -548,12 +537,12 @@ public class CmisConnector implements Cloneable
 			fileObject = KettleVFS.getFileObject(sourcefile, transmeta);
 		} catch (KettleFileException e) {
 //			/* should never occur - as previous checks will reveal all error with this cause.*/
-			setMsgError(e.getMessage());
+			setMsgError("KettleFileException " + e.getMessage());
 		}
 		try {
 			file = new FileInputStream(KettleVFS.getFilename(fileObject));
 		} catch (FileNotFoundException e) {
-			setMsgError(e.getMessage());
+			setMsgError("FileNotFoundException "+e.getMessage());
 			return false;
 		}
 		
@@ -581,7 +570,7 @@ public class CmisConnector implements Cloneable
 		try {
 			newDocument = parent.createDocument(properties, content, getVersioningState());
 		} catch (Exception e) {
-			setMsgError(e.getMessage());
+			setMsgError("createDocument Exception "+e.getMessage());
 		}
 		return (AlfrescoDocument) newDocument;
 	}
@@ -746,7 +735,33 @@ public class CmisConnector implements Cloneable
 	    }
 
 	}
-	
+
+	public Map<String, Integer> GetPropertiesValueList(){
+
+		final Map<String, Integer> fields = new HashMap<String, Integer>();
+		
+		ObjectType type = session.getTypeDefinition("D:erp:document");
+//		ObjectType type = session.getTypeDefinition("P:erp:invoiceAspect");
+		Collection<PropertyDefinition<?>> properties = type.getPropertyDefinitions().values();
+		for (PropertyDefinition<?> propertyDefinition : properties) {
+			if (propertyDefinition.getLocalNamespace().equals(type.getLocalNamespace())){
+//				System.out.println(propertyDefinition.getId());
+//				System.out.println(propertyDefinition.getPropertyType());
+				if (propertyDefinition.getExtensions() != null){
+					List<CmisExtensionElement> choices = propertyDefinition.getExtensions();
+					for (int i = 0; i < choices.size(); i++) {
+						List<CmisExtensionElement> list = propertyDefinition.getExtensions().get(i).getChildren();
+						for (CmisExtensionElement cmisExtensionElement : list) {
+//							System.out.println("Choice "+ i + " :" + cmisExtensionElement.getValue());
+							fields.put(cmisExtensionElement.getValue(), i);
+						}
+					}
+				}
+			}		
+		}
+		return fields;
+	}
+		
 
 	public void setCmisDialogProperties(TableView wMetaDataList,String documenttype) {
 		int i=0;
@@ -762,15 +777,15 @@ public class CmisConnector implements Cloneable
 						propertyDefinition.getUpdatability();
 						if(propertyDefinition.getUpdatability()!=Updatability.READONLY){
 							/* skip name, because already defined elsewhere & object id */
-							wMetaDataList.table.setItemCount(i+1);
 							TableItem item = wMetaDataList.table.getItem(i);
-							i+=1;
 							item.setText(0, Integer.toString(i));
 							item.setText(2, Const.NVL(propertyDefinition.getId(), ""));
 							item.setText(3, Const.NVL(propertyDefinition.getUpdatability().name(), ""));
 							item.setText(4, Const.NVL(propertyDefinition.getCardinality().name(), ""));
 							item.setText(5, Const.NVL(propertyDefinition.getLocalName(), ""));
 							item.setText(6, Const.NVL(documenttype, ""));
+							i+=1;
+							wMetaDataList.table.setItemCount(i);
 						}
 					}	
 				} 					     
@@ -793,15 +808,15 @@ public class CmisConnector implements Cloneable
 				propertyDefinition.getUpdatability();
 				if(propertyDefinition.getUpdatability()!=Updatability.READONLY){
 					/* skip name, because already defined elsewhere & object id */
-					wMetaDataList.table.setItemCount(i+1);
-					TableItem item = wMetaDataList.table.getItem(i);
-					i+=1;
+					TableItem item = wMetaDataList.table.getItem(i-1);
 					item.setText(0, Integer.toString(i));
 					item.setText(2, Const.NVL(propertyDefinition.getId(), ""));
 					item.setText(3, Const.NVL(propertyDefinition.getUpdatability().name(), ""));
 					item.setText(4, Const.NVL(propertyDefinition.getCardinality().name(), ""));
 					item.setText(5, Const.NVL(propertyDefinition.getLocalName(), ""));
 					item.setText(6, Const.NVL(documenttype, ""));
+					i+=1;
+					wMetaDataList.table.setItemCount(i);
 				}
 			}	
 		}
