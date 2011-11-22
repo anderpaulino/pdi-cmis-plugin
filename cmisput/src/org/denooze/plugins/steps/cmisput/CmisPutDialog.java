@@ -604,6 +604,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
                 CmisConnector.GetDocumentTypeList(wDocumentType,wBaseContentModel);
                 shell.setCursor(null);
                 busy.dispose();
+                input.setChanged();
             }
         }
     );
@@ -689,6 +690,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
                 getFieldNames(wDocumentField);
                 shell.setCursor(null);
                 busy.dispose();
+                input.setChanged();
             }
         }
     );
@@ -745,6 +747,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
                 getFieldNames(wFileNameField);
                 shell.setCursor(null);
                 busy.dispose();
+                input.setChanged();
             }
         }
     );
@@ -1166,12 +1169,15 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 	protected void GetDocumentProperties(Shell shell) {
         Cursor busy = new Cursor(shell.getDisplay(), SWT.CURSOR_WAIT);
 		shell.setCursor(busy);
-		CmisConnector.setCmisDialogProperties(wMetaDataList,input.getDocumentType());
-		if (input.getDocumentAspectName()!=null) {
-			for (int i=0;i<input.getDocumentAspectName().length;i++)
-			{
-				CmisConnector.setCmisDialogAspectProperties(wMetaDataList,input.getDocumentAspectName()[i]);
-			}
+		/*Get inherited properties of document type*/
+		CmisConnector.setCmisDialogProperties(wMetaDataList,wDocumentType.getText());
+		/*Get properties on document type*/
+		CmisConnector.setCmisDialogAspectProperties(wMetaDataList,wDocumentType.getText());
+		/*Get properties on aspects*/
+		for (int i=0;i<wAspectListStruct.nrNonEmpty();i++)
+		{
+			TableItem item = wAspectListStruct.getNonEmpty(i);
+			CmisConnector.setCmisDialogAspectProperties(wMetaDataList,item.getText(1));
 		}		
         shell.setCursor(null);
 	}
