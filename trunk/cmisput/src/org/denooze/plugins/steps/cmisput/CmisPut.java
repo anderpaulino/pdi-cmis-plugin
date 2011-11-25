@@ -182,7 +182,11 @@ public class CmisPut extends BaseStep implements StepInterface
 			if (meta.getDocumentPropertyFieldName()!=null) {
 				for (int i=0;i<meta.getDocumentPropertyFieldName().length;i++)
 				{
-					CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],r[data.propertiesArgumentIndexes[i]].toString());
+					if(r[data.propertiesArgumentIndexes[i]]!=null){
+						CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],r[data.propertiesArgumentIndexes[i]].toString());
+					} else {
+						CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],"");
+					}
 				}
 			}
 			/* create document*/

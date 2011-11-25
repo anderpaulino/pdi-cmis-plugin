@@ -87,7 +87,8 @@ import org.pentaho.di.ui.core.widget.TextVar;
  */
 public class CmisConnector implements Cloneable
 {
-	
+
+	private static Class<?> PKG = CmisPutMeta.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
 	private Properties cmsProperties;
     private static Session session;
     private Iterable<Repository> repolist;
@@ -466,20 +467,22 @@ public class CmisConnector implements Cloneable
 		
 		for (int i=0;i<folderArgumentIndexes.length;i++) {
 			CurrentFolder = (String) r[folderArgumentIndexes[i]];
-			topath = topath + "/" + CurrentFolder.trim();
+			if (CurrentFolder!=null) {/* we ignore empty folders */
+				topath = topath + "/" + CurrentFolder.trim();
 
-			AlfrescoFolder Folder = null;
-			try {
-				Folder = (AlfrescoFolder) getSession().getObjectByPath(topath);
-			} catch (CmisObjectNotFoundException e) {
+				AlfrescoFolder Folder = null;
 				try {
-					Folder = createFolder(parentFolder,CurrentFolder,properties,object_type_id[i]);
-				} catch (Exception e1) {
-					setMsgError(e.getMessage());
-					return false;
+					Folder = (AlfrescoFolder) getSession().getObjectByPath(topath);
+				} catch (CmisObjectNotFoundException e) {
+					try {
+						Folder = createFolder(parentFolder,CurrentFolder,properties,object_type_id[i]);
+					} catch (Exception e1) {
+						setMsgError(e.getMessage());
+						return false;
+					}
 				}
-			}
-			parentFolder = Folder;
+				parentFolder = Folder;
+			}			
 			setLastCreatedDynPath(topath);
 		}
 		return true;
@@ -797,7 +800,9 @@ public class CmisConnector implements Cloneable
 				}
 		}
 		
-	}	public void setCmisDialogAspectProperties(TableView wMetaDataList,String documenttype) {
+	}	
+	
+	public void setCmisDialogAspectProperties(TableView wMetaDataList,String documenttype) {
 		int i=wMetaDataList.table.getItemCount();
 		
 		ObjectType type2 = session.getTypeDefinition(documenttype);
