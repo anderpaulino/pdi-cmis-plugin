@@ -149,6 +149,18 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
     {
         return documentAspectName;
     }
+    
+    /**
+     * @return Returns the argument.
+     */
+    public int getDocumentAspectNameLength()
+    {
+    	if (documentAspectName!=null){
+    		return documentAspectName.length;
+    	} else {
+            return 0;
+    	}
+    }
 
     /**
      * @param argument The argument to set.
@@ -163,6 +175,18 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
     public String[] getDocumentPropertyFieldName()
     {
         return documentPropertyFieldName;
+    }
+    
+    /**
+     * @return Returns the argument.
+     */
+    public int getDocumentPropertyFieldNameLength()
+    {
+    	if (documentPropertyFieldName!=null){
+    		return documentPropertyFieldName.length;
+    	} else {
+            return 0;
+    	}
     }
 
     /**
@@ -193,6 +217,17 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
         return folderArgumentField;
     }
 
+    /**
+     * @return Returns the argument.
+     */
+    public int getFolderArgumentFieldLength()
+    {
+    	if (folderArgumentField!=null){
+    		return folderArgumentField.length;
+    	} else {
+            return 0;
+    	}
+    }
     /**
      * @param argument The argument to set.
      */
