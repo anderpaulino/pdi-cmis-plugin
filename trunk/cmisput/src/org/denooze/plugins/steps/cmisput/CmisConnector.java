@@ -59,6 +59,7 @@ import org.apache.chemistry.opencmis.commons.definitions.PropertyDefinition;
 import org.apache.chemistry.opencmis.commons.enums.BindingType;
 import org.apache.chemistry.opencmis.commons.enums.Updatability;
 import org.apache.chemistry.opencmis.commons.enums.VersioningState;
+import org.apache.chemistry.opencmis.commons.exceptions.CmisBaseException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisConnectionException;
 import org.apache.chemistry.opencmis.commons.exceptions.CmisObjectNotFoundException;
 import org.apache.chemistry.opencmis.commons.impl.dataobjects.ContentStreamImpl;
@@ -374,7 +375,7 @@ public class CmisConnector implements Cloneable
 		ItemIterable<ObjectType> childDocType = session.getTypeChildren(wBaseContentModel.getText(), true);
 		for (ObjectType objectType : childDocType) {
 			String localNameSpace = objectType.getLocalNamespace();
-			if (!localNameSpaceFilter.isEmpty()){
+			if ((localNameSpaceFilter!=null) && (!localNameSpaceFilter.isEmpty())){
 				if (localNameSpace.contains(localNameSpaceFilter))
 				{
 //					wDocumentType.add(objectType.getDisplayName()+" ("+objectType.getId()+")");
@@ -394,7 +395,7 @@ public class CmisConnector implements Cloneable
 		ItemIterable<ObjectType> childDocType = session.getTypeChildren(parentDocumentType, true);
 		for (ObjectType objectType : childDocType) {
 			String localNameSpace = objectType.getLocalNamespace();
-			if (!localNameSpaceFilter.isEmpty()){
+			if ((localNameSpaceFilter!=null) && (!localNameSpaceFilter.isEmpty())){
 				if (localNameSpace.contains(localNameSpaceFilter))
 				{
 //					wDocumentType.add(objectType.getDisplayName()+" ("+objectType.getId()+")");
@@ -416,7 +417,7 @@ public class CmisConnector implements Cloneable
 		wDocumentType.add(cmisBaseFolderType);
 		for (ObjectType objectType : childDocType) {
 			String localNameSpace = objectType.getLocalNamespace();
-			if (!localNameSpaceFilter.isEmpty()){
+			if ((localNameSpaceFilter!=null) && (!localNameSpaceFilter.isEmpty())){
 				if (localNameSpace.contains(localNameSpaceFilter))
 				{
 					wDocumentType.add(objectType.getId());
@@ -437,7 +438,7 @@ public class CmisConnector implements Cloneable
 		ItemIterable<ObjectType> aspects = session.getTypeChildren("cmis:policy", false);
 		for (ObjectType objectType : aspects) {
 			String localNameSpace = objectType.getLocalNamespace();
-			if (!localNameSpaceFilter.isEmpty()){
+			if ((localNameSpaceFilter!=null) && (!localNameSpaceFilter.isEmpty())){
 				if (localNameSpace.contains(localNameSpaceFilter)) {
 					fields.put(objectType.getId(),i);
 				}
@@ -449,6 +450,11 @@ public class CmisConnector implements Cloneable
 		return fields;
 	}
 	
+	public void CheckSession(){
+		if (getSession()== null) {				
+			initCmisSession();
+		}
+	}
 
 	public Boolean CreateDynPathIfNotExists(String topath, Object[] r, int[] folderArgumentIndexes, String[] object_type_id){
 
@@ -462,7 +468,8 @@ public class CmisConnector implements Cloneable
 		if (topath.endsWith("/")) {
 			topath = topath.substring(0, topath.length()-1);
 		}
-
+		
+		CheckSession();
 		parentFolder = (AlfrescoFolder) getSession().getObjectByPath(topath);
 		
 		for (int i=0;i<folderArgumentIndexes.length;i++) {
@@ -505,6 +512,7 @@ public class CmisConnector implements Cloneable
 			}
 			AlfrescoFolder Folder = null;
 			Boolean Retry= true; 
+			Boolean First= true; 
 			Integer RetryCount = 0;/*If at the same time 2 copies of a step try to create a directory, do a retry */
 			while ((RetryCount <50) && (Retry)) {
 				RetryCount+=1;
@@ -513,12 +521,21 @@ public class CmisConnector implements Cloneable
 					Retry = false;
 				} catch (CmisObjectNotFoundException e) {
 					try {
-						Folder = createFolder(parentFolder,CurrentFolder,properties,object_type_id);
-						Retry = false;
+						if (First){
+							randomDelay(100,2000);
+							First=false;
+						} else {
+							Folder = createFolder(parentFolder,CurrentFolder,properties,object_type_id);
+							Retry = false;
+						}
 					} catch (Exception e1) {
 						setMsgError("Retry count = "+RetryCount+" Message = "+e.getMessage());
-						if (RetryCount == 49) return false;
 					}
+				} catch (CmisBaseException  e) {
+					setMsgError("Retry count = "+RetryCount+" Message = "+e.getMessage());
+					randomDelay(100,2000);
+				} finally {
+					if (RetryCount == 49) return false;
 				}	
 			}
 					
@@ -527,7 +544,16 @@ public class CmisConnector implements Cloneable
 		}
 		return true;
 	}
-	
+	void randomDelay(float min, float max){	
+		int random = (int)(max * Math.random() + min);	
+		try {		
+			Thread.sleep(random);	
+			} 
+		catch (InterruptedException e) {
+			// TODO Auto-generated catch block		e.printStackTrace();	
+			}
+	}
+
 	public Boolean CreateDocument(String documenttype,String cmsfilename,String sourcefile, TransMeta transmeta){
 
 	    final Map<String, Object> properties = getDocumentproperties();

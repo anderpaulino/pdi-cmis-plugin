@@ -171,7 +171,7 @@ public class CmisPut extends BaseStep implements StepInterface
 		
 		if (meta.HasVariablePath()==true){/* if document has a variable path - make sure this path exists */
 			if (!CmisConnector.CreateDynPathIfNotExists(meta.getToPath(),r,data.folderArgumentIndexes,meta.getFolderArgumentFolderType())){
-				throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingToPath",CmisConnector.getMsgError())); //$NON-NLS-1$
+				throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingToPath",environmentSubstitute(r[data.filenamefieldid].toString()),CmisConnector.getMsgError())); //$NON-NLS-1$
 			} else {
 				if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateToPathOK",CmisConnector.getLastCreatedDynPath())); //$NON-NLS-1$				
 			  }
@@ -183,7 +183,7 @@ public class CmisPut extends BaseStep implements StepInterface
 				for (int i=0;i<meta.getDocumentPropertyFieldName().length;i++)
 				{
 					if(r[data.propertiesArgumentIndexes[i]]!=null){
-						CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],r[data.propertiesArgumentIndexes[i]].toString());
+						CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],r[data.propertiesArgumentIndexes[i]]);
 					} else {
 						CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],"");
 					}
