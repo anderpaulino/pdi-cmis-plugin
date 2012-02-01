@@ -16,8 +16,12 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,9 +77,12 @@ import org.eclipse.swt.widgets.TableItem;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleFileException;
+import org.pentaho.di.core.row.RowMetaInterface;
+import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.vfs.KettleVFS;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.steps.pgbulkloader.PGBulkLoaderMeta;
 import org.pentaho.di.ui.core.dialog.ErrorDialog;
 import org.pentaho.di.ui.core.widget.TableView;
 import org.pentaho.di.ui.core.widget.TextVar;
@@ -91,7 +98,7 @@ public class CmisConnector implements Cloneable
 
 	private static Class<?> PKG = CmisPutMeta.class; // for i18n purposes, needed by Translator2!!   $NON-NLS-1$
 	private Properties cmsProperties;
-    private static Session session;
+    private Session session;
     private Iterable<Repository> repolist;
     private String msgError;
     private String localNameSpaceFilter;
@@ -103,6 +110,7 @@ public class CmisConnector implements Cloneable
     private String cmisVersionSupported;
     private VersioningState VersioningState;
     private Map<String, Object> documentproperties = new HashMap<String, Object>();
+    private String separatorChar = ";";
     /**
 	 * 
 	 */
@@ -308,12 +316,198 @@ public class CmisConnector implements Cloneable
 	public Map<String, Object> getDocumentproperties() {
 		return documentproperties;
 	}
+	
+	public static int safeLongToInt(long l) {
+		if (l < Integer.MIN_VALUE || l > Integer.MAX_VALUE) {
+		throw new IllegalArgumentException (l + " cannot be cast to int without changing its value.");
+		}
+		return (int) l; 
+	} 
 
 	/**
 	 * @param documentproperties the documentproperties to set
 	 */
-	public void setDocumentproperty(String key, Object value) {
-		this.documentproperties.put(key, value);
+	public boolean setDocumentproperty(CmisPutMeta meta, RowMetaInterface rowMeta, Integer index, Object value, Integer rowIndex) {
+		Boolean result = false;
+		String dataType = meta.getDocumentPropertyDataType()[index]; 
+		String key = meta.getDocumentPropertyName()[index];
+		String cardinality = meta.getDocumentPropertyCardinality()[index];
+		
+		ValueMetaInterface valueMeta = rowMeta.getValueMeta(rowIndex);
+	
+		switch(valueMeta.getType()) {
+		case ValueMetaInterface.TYPE_STRING :
+			if (cardinality.contains("SINGLE")) {
+				if (dataType.contains("STRING")) {
+					this.documentproperties.put(key, value);
+					result = true;
+				}
+			} else { /* Cardinality is MULTI */
+				if (dataType.contains("STRING")) {
+					ArrayList<String> al = new ArrayList<String>();
+					String multiString;
+					
+					if (value instanceof String) {
+						multiString = (String) value;
+					} else {
+						multiString = value.toString();
+					}
+					String[] multiStringParts = multiString.split(separatorChar);
+					for (int i=0;i<multiStringParts.length;i++) {
+						al.add(multiStringParts[i]);
+					}
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+				if (dataType.contains("INTEGER")) {
+					ArrayList<Integer> al = new ArrayList<Integer>();
+					String multiString;
+					multiString = (String) value;
+					
+					String[] multiStringParts = multiString.split(separatorChar);
+					for (int i=0;i<multiStringParts.length;i++) {
+						try {
+							al.add(Integer.parseInt(multiStringParts[i]));
+						} 
+						catch (NumberFormatException e) {
+							setMsgError(e.getMessage());
+							return false;
+						}
+					}
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+				if (dataType.contains("BOOLEAN")) {
+					ArrayList<Boolean> al = new ArrayList<Boolean>();
+					String multiString;
+					multiString = (String) value;
+					
+					String[] multiStringParts = multiString.split(separatorChar);
+					for (int i=0;i<multiStringParts.length;i++) {
+						try {
+							if (multiStringParts[i].equals("Y")){
+								al.add(true);
+							} else {
+								al.add(false);
+							}
+						} 
+						catch (NumberFormatException e) {
+							setMsgError(e.getMessage());
+							return false;
+						}
+					}
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+				if (dataType.contains("DATETIME")) {
+					ArrayList<Date> al = new ArrayList<Date>();
+					String multiString;
+					multiString = (String) value;
+					
+					String[] multiStringParts = multiString.split(separatorChar);
+					for (int i=0;i<multiStringParts.length;i++) {
+						try {
+							if (multiStringParts[i].length() > 10){
+								DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+								al.add(formatter.parse(multiStringParts[i]));
+							} else {
+								DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
+								al.add(formatter.parse(multiStringParts[i]));
+							}
+						} 
+						catch (ParseException e) {
+							setMsgError(e.getMessage());
+							return false;
+						}
+					}
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+				if (dataType.contains("DECIMAL")) {
+					ArrayList<Double> al = new ArrayList<Double>();
+					String multiString;
+					multiString = (String) value;
+					
+					String[] multiStringParts = multiString.split(separatorChar);
+					for (int i=0;i<multiStringParts.length;i++) {
+						try {
+							al.add(Double.parseDouble(multiStringParts[i]));
+						} 
+						catch (NumberFormatException e) {
+							setMsgError(e.getMessage());
+							return false;
+						}
+					}
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+			}
+			break;
+		case ValueMetaInterface.TYPE_INTEGER:
+			if (cardinality.contains("SINGLE")) {
+				if (dataType.contains("INTEGER")) {
+					this.documentproperties.put(key, value);
+					result = true;
+				}
+			} else { /* Cardinality is MULTI */
+				if (dataType.contains("INTEGER")) {
+					ArrayList<Integer> al = new ArrayList<Integer>();
+					al.add((Integer) value);
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+			}
+			break;
+		case ValueMetaInterface.TYPE_DATE:
+			if (cardinality.contains("SINGLE")) {
+				if (dataType.contains("DATETIME")) {
+					this.documentproperties.put(key, value);
+					result = true;
+				}
+			} else { /* Cardinality is MULTI */
+				if (dataType.contains("DATETIME")) {
+					ArrayList<Date> al = new ArrayList<Date>();
+					al.add((Date) value);
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+			}
+			break;
+		case ValueMetaInterface.TYPE_BOOLEAN:
+			if (cardinality.contains("SINGLE")) {
+				if (dataType.contains("BOOLEAN")) {
+					this.documentproperties.put(key, value);
+					result = true;
+				}
+			} else { /* Cardinality is MULTI */
+				if (dataType.contains("BOOLEAN")) {
+					ArrayList<Boolean> al = new ArrayList<Boolean>();
+					al.add((Boolean) value);
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+			}
+			break;
+		case ValueMetaInterface.TYPE_NUMBER:
+			if (cardinality.contains("SINGLE")) {
+				if (dataType.contains("DECIMAL")) {
+					this.documentproperties.put(key, value);
+					result = true;
+				}
+			} else { /* Cardinality is MULTI */
+				if (dataType.contains("DECIMAL")) {
+					ArrayList<Double> al = new ArrayList<Double>();
+					al.add((Double) value);
+					this.documentproperties.put(key, al);
+					result = true;
+				}
+			}
+			break;
+		case ValueMetaInterface.TYPE_BIGNUMBER:
+			/* CMIS does not support this type*/
+			break;
+		}
+		return result;
 	}
 
 	/**
@@ -813,6 +1007,7 @@ public class CmisConnector implements Cloneable
 							item.setText(4, Const.NVL(propertyDefinition.getCardinality().name(), ""));
 							item.setText(5, Const.NVL(propertyDefinition.getLocalName(), ""));
 							item.setText(6, Const.NVL(documenttype, ""));
+							item.setText(7, Const.NVL(propertyDefinition.getPropertyType().name(), ""));
 							i+=1;
 							wMetaDataList.table.setItemCount(i);
 						}
@@ -846,6 +1041,7 @@ public class CmisConnector implements Cloneable
 					item.setText(4, Const.NVL(propertyDefinition.getCardinality().name(), ""));
 					item.setText(5, Const.NVL(propertyDefinition.getLocalName(), ""));
 					item.setText(6, Const.NVL(documenttype, ""));
+					item.setText(7, Const.NVL(propertyDefinition.getPropertyType().name(), ""));
 					i+=1;
 					wMetaDataList.table.setItemCount(i);
 				}
