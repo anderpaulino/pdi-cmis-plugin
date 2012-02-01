@@ -107,14 +107,17 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
     /** function arguments : documentPropertyUpdatability*/
     private String  documentPropertyUpdatability[];
 
-    /** function arguments : documentPropertyUpdatability*/
+    /** function arguments : documentPropertyCardinality*/
     private String  documentPropertyCardinality[];
 
-    /** function arguments : documentPropertyUpdatability*/
+    /** function arguments : documentPropertyDisplayName*/
     private String  documentPropertyDisplayName[];
 
-    /** function arguments : documentPropertyUpdatability*/
+    /** function arguments : documentPropertyDocumentType*/
     private String  documentPropertyDocumentType[];
+
+    /** function arguments : documentPropertyDataType*/
+    private String  documentPropertyDataType[];
     
     /** function arguments : fieldname*/
     private String  folderArgumentField[];
@@ -296,6 +299,18 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 		this.documentPropertyDocumentType[i] = documentPropertyDocumentType;
 	}
 	/**
+	 * @return the documentPropertyDataType
+	 */
+	public String[] getDocumentPropertyDataType() {
+		return documentPropertyDataType;
+	}
+	/**
+	 * @param documentPropertyDataType the documentPropertyDataType to set
+	 */
+	public void setDocumentPropertyDataType(int i,String documentPropertyDataType) {
+		this.documentPropertyDataType[i] = documentPropertyDataType;
+	}
+	/**
 	 * @return the url
 	 */
 	public String getUrl() {
@@ -449,6 +464,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
         retval.append("    " + XMLHandler.addTagValue("repository",  repository));
         retval.append("    " + XMLHandler.addTagValue("standard",  standard));
         retval.append("    " + XMLHandler.addTagValue("username",  username));
+        /* TODO encrypt password before saving it to the file*/
         retval.append("    " + XMLHandler.addTagValue("password", password));
         retval.append("    " + XMLHandler.addTagValue("basecontentmodel",  basecontentmodel));
         retval.append("    " + XMLHandler.addTagValue("documenttype", documenttype));
@@ -488,6 +504,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
             retval.append("        ").append(XMLHandler.addTagValue("documentPropertyCardinality", getDocumentPropertyCardinality()[i])); //$NON-NLS-1$ //$NON-NLS-2$
             retval.append("        ").append(XMLHandler.addTagValue("documentPropertyDisplayName", getDocumentPropertyDisplayName()[i])); //$NON-NLS-1$ //$NON-NLS-2$
             retval.append("        ").append(XMLHandler.addTagValue("documentPropertyDocumentType", getDocumentPropertyDocumentType()[i])); //$NON-NLS-1$ //$NON-NLS-2$
+            retval.append("        ").append(XMLHandler.addTagValue("documentPropertyDataType", getDocumentPropertyDataType()[i])); //$NON-NLS-1$ //$NON-NLS-2$
             retval.append("      </documentarg>").append(Const.CR); //$NON-NLS-1$
         }
 
@@ -504,6 +521,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
         repository = XMLHandler.getTagValue(stepnode, "repository");
         standard = XMLHandler.getTagValue(stepnode, "standard");
         username = XMLHandler.getTagValue(stepnode, "username");
+        /* TODO decrypt password before saving it to the file*/
         password = XMLHandler.getTagValue(stepnode, "password");
         basecontentmodel = XMLHandler.getTagValue(stepnode, "basecontentmodel");
         documenttype = XMLHandler.getTagValue(stepnode, "documenttype");
@@ -551,6 +569,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
             getDocumentPropertyCardinality()[i] = XMLHandler.getTagValue(anode, "documentPropertyCardinality"); //$NON-NLS-1$
             getDocumentPropertyDisplayName()[i] = XMLHandler.getTagValue(anode, "documentPropertyDisplayName"); //$NON-NLS-1$
             getDocumentPropertyDocumentType()[i] = XMLHandler.getTagValue(anode, "documentPropertyDocumentType"); //$NON-NLS-1$
+            getDocumentPropertyDataType()[i] = XMLHandler.getTagValue(anode, "documentPropertyDataType"); //$NON-NLS-1$
         }
 
     
@@ -573,11 +592,13 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 	public void readRep(Repository rep, ObjectId id_step, List<DatabaseMeta> databases, Map<String, Counter> counters)
 		throws KettleException
 	{
+        /* TODO implement*/
 	}
 	
 	public void saveRep(Repository rep, ObjectId id_transformation, ObjectId id_step)
 		throws KettleException
 	{
+        /* TODO implement*/
 	}
 	
 	public void getFields(RowMetaInterface row, String name, RowMetaInterface[] info, StepMeta nextStep, VariableSpace space) throws KettleStepException {
@@ -632,6 +653,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 		documentPropertyCardinality = new String[nrargs];
 		documentPropertyDisplayName = new String[nrargs];
 		documentPropertyDocumentType = new String[nrargs];
+		documentPropertyDataType = new String[nrargs];
     }
 
 	public void allocateaspect(int nrargs)

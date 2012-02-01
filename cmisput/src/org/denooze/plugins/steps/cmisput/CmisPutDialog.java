@@ -1006,6 +1006,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
      	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.MetaDataList.ColumnInfo.PropertyCardinality"), ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, true),
      	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.MetaDataList.ColumnInfo.PropertyDisplayName"), ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, true),
      	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.MetaDataList.ColumnInfo.PropertyDocumentType"), ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, true),
+     	  new ColumnInfo(BaseMessages.getString(PKG, "CmisPutDialog.MetaDataList.ColumnInfo.PropertyDataType"), ColumnInfo.COLUMN_TYPE_CCOMBO, new String[] { "" }, true),
         };
      		
      	wMetaDataList=new TableView(transMeta, wPropertiesComp,
@@ -1328,6 +1329,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 				if(input.getDocumentPropertyCardinality()[i] != null) item.setText(4, Const.NVL(input.getDocumentPropertyCardinality()[i], ""));
 				if(input.getDocumentPropertyDisplayName()[i] != null) item.setText(5, Const.NVL(input.getDocumentPropertyDisplayName()[i], ""));
 				if(input.getDocumentPropertyDocumentType()[i] != null) item.setText(6, Const.NVL(input.getDocumentPropertyDocumentType()[i], ""));
+				if(input.getDocumentPropertyDataType()[i] != null) item.setText(7, Const.NVL(input.getDocumentPropertyDataType()[i], ""));
 			}
 		}
 		SetVersionLogic();
@@ -1434,6 +1436,7 @@ public class CmisPutDialog extends BaseStepDialog implements StepDialogInterface
 			input.setDocumentPropertyCardinality(i,item.getText(4));
 			input.setDocumentPropertyDisplayName(i,item.getText(5));
 			input.setDocumentPropertyDocumentType(i,item.getText(6));
+			input.setDocumentPropertyDataType(i,item.getText(7));
 		}
 		if (CmisConnector.getSession()!=null) {
 			CmisConnector.clearSession();	

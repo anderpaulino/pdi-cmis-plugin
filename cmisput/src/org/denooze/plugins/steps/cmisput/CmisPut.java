@@ -112,7 +112,8 @@ public class CmisPut extends BaseStep implements StepInterface
 						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.VersioningState","NONE")); //$NON-NLS-1$
 					}
 					/* if document has a fixed path - make sure this path exists */
-					if (!CmisConnector.CreatePathIfNotExists(meta.getToPath(),"cmis:folder")){
+					/* TODO allow folder type to be choosen */ 
+					if (!CmisConnector.CreatePathIfNotExists(meta.getToPath(),"F:pm:folder")){
 						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingToPath",meta.getToPath(),CmisConnector.getMsgError())); //$NON-NLS-1$
 					} else {
 						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateToPathOK",meta.getToPath())); //$NON-NLS-1$
@@ -183,9 +184,21 @@ public class CmisPut extends BaseStep implements StepInterface
 				for (int i=0;i<meta.getDocumentPropertyFieldName().length;i++)
 				{
 					if(r[data.propertiesArgumentIndexes[i]]!=null){
-						CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],r[data.propertiesArgumentIndexes[i]]);
+						if (!CmisConnector.setDocumentproperty(meta, getInputRowMeta(), i, r[data.propertiesArgumentIndexes[i]],data.propertiesArgumentIndexes[i])) {
+							throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorSettingProperties"
+									                                            ,r[data.propertiesArgumentIndexes[i]]
+									                                            ,meta.getDocumentPropertyName()[i]
+									                                            ,meta.getDocumentPropertyDataType()[i]
+									                                            ,CmisConnector.getMsgError())); //$NON-NLS-1$
+						}
 					} else {
-						CmisConnector.setDocumentproperty(meta.getDocumentPropertyName()[i],"");
+						if (!CmisConnector.setDocumentproperty(meta, getInputRowMeta(), i, "",data.propertiesArgumentIndexes[i])) {
+		                     throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorSettingProperties"
+		                    		 											 ,r[data.propertiesArgumentIndexes[i]]
+		                    		 											 ,meta.getDocumentPropertyName()[i]
+		                    		 											 ,meta.getDocumentPropertyDataType()[i]
+		                    		 											 ,CmisConnector.getMsgError())); //$NON-NLS-1$
+		                }
 					}
 				}
 			}
@@ -260,11 +273,11 @@ public class CmisPut extends BaseStep implements StepInterface
 	}
 
 	private boolean checkrow(Object[] r, TransMeta transmeta) throws KettleException {
-		Object[] r1 = r;
-		TransMeta t1 = transmeta;
 		
-		String sourcfile = environmentSubstitute((String)r[data.documentfieldid]);
-		
+		final String sourcfile = environmentSubstitute((String)r[data.documentfieldid]);
+		if (sourcfile==null){
+			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotDefined",sourcfile)); //$NON-NLS-1$
+		}
 		FileObject fileObject = KettleVFS.getFileObject(sourcfile, transmeta);
 		if (!(fileObject instanceof LocalFile)) {
 			// We can only use NIO on local files at the moment, so that's what we limit ourselves to.

@@ -11,7 +11,7 @@
 	
     <!-- system properties to use -->
     <property name= "cr" 		value="${line.separator}"/> 
-    <property name="version"	value="1.2"/>
+    <property name="version"	value="1.3.2"/>
 
     <!-- set global properties for this build -->
 
@@ -203,7 +203,7 @@
     Default target: all
     ==========================
     -->
-    <target name="default" depends="deploy" description="default = build all"/>
+    <target name="default" depends="clean,deploy" description="default = build all"/>
 
     <!--
     ==========================
@@ -212,6 +212,7 @@
     -->
 
     <target name="clean"  description="clean up generated files" >
+        <echo>Clean-up...</echo>
         <delete dir="${classes}"/>
         <delete dir="${lib}"/>
         <delete dir="${distrib}"/>
