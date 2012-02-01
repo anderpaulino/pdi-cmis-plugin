@@ -73,6 +73,7 @@ import org.apache.commons.vfs.FileObject;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
@@ -989,6 +990,7 @@ public class CmisConnector implements Cloneable
 	public void setCmisDialogProperties(TableView wMetaDataList,String documenttype) {
 		int i=0;
 		wMetaDataList.removeAll();
+		wMetaDataList.table.removeAll();
 		
 		while ((documenttype!=null) && (!documenttype.isEmpty())){
 			ItemIterable<ObjectType> types = session.getTypeChildren(documenttype, true); 
@@ -1000,7 +1002,9 @@ public class CmisConnector implements Cloneable
 						propertyDefinition.getUpdatability();
 						if(propertyDefinition.getUpdatability()!=Updatability.READONLY){
 							/* skip name, because already defined elsewhere & object id */
-							TableItem item = wMetaDataList.table.getItem(i);
+							Table items = wMetaDataList.getTable();
+							Integer count = items.getItemCount();
+							TableItem item = new TableItem(items, SWT.NONE);
 							item.setText(0, Integer.toString(i));
 							item.setText(2, Const.NVL(propertyDefinition.getId(), ""));
 							item.setText(3, Const.NVL(propertyDefinition.getUpdatability().name(), ""));
@@ -1009,7 +1013,6 @@ public class CmisConnector implements Cloneable
 							item.setText(6, Const.NVL(documenttype, ""));
 							item.setText(7, Const.NVL(propertyDefinition.getPropertyType().name(), ""));
 							i+=1;
-							wMetaDataList.table.setItemCount(i);
 						}
 					}	
 				} 					     
@@ -1034,7 +1037,9 @@ public class CmisConnector implements Cloneable
 				propertyDefinition.getUpdatability();
 				if(propertyDefinition.getUpdatability()!=Updatability.READONLY){
 					/* skip name, because already defined elsewhere & object id */
-					TableItem item = wMetaDataList.table.getItem(i-1);
+					Table items = wMetaDataList.getTable();
+					Integer count = items.getItemCount();
+					TableItem item = new TableItem(items, SWT.NONE);
 					item.setText(0, Integer.toString(i));
 					item.setText(2, Const.NVL(propertyDefinition.getId(), ""));
 					item.setText(3, Const.NVL(propertyDefinition.getUpdatability().name(), ""));
@@ -1043,7 +1048,7 @@ public class CmisConnector implements Cloneable
 					item.setText(6, Const.NVL(documenttype, ""));
 					item.setText(7, Const.NVL(propertyDefinition.getPropertyType().name(), ""));
 					i+=1;
-					wMetaDataList.table.setItemCount(i);
+//					wMetaDataList.table.setItemCount(i);
 				}
 			}	
 		}
