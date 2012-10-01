@@ -85,7 +85,8 @@ public class CmisPut extends BaseStep implements StepInterface
     	        }	
         } catch(Exception e) {
         	if (getStepMeta().isDoingErrorHandling()) {
-        		putError(getInputRowMeta(), r, 1L, e.toString(), null, "UJE001");
+        		putError(getInputRowMeta(), r, 1L, e.toString(), null, null);
+        		//ErrorDescription field = e.toString(),ErrorFieldsFieldname=null,ErrorCodesFieldname=null
         	} else {
         	  throw new KettleException(e);
         	}
