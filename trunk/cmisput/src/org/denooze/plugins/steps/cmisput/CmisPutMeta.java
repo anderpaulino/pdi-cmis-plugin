@@ -454,6 +454,7 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 	{
 		Object retval = super.clone();
 		return retval;
+		//TODO test via a copy of the object on the canvas
 	}
 	
 	public String getXML()
@@ -605,11 +606,13 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
         
     	ValueMetaInterface v=new ValueMeta(this.getCmisidfield(), ValueMetaInterface.TYPE_STRING);
         v.setOrigin(name);
+        v.setTrimType(ValueMeta.TRIM_TYPE_BOTH);
         row.addValueMeta( v );
     }
 
 	public void check(List<CheckResultInterface> remarks, TransMeta transMeta, StepMeta stepinfo, RowMetaInterface prev, String input[], String output[], RowMetaInterface info)
 	{
+	//TODO sits behind the check button in the ui: test it.
 		CheckResult cr;
 		if (prev==null || prev.size()==0)
 		{
@@ -713,5 +716,9 @@ public class CmisPutMeta extends BaseStepMeta implements StepMetaInterface
 	 */
 	public void setCmisidfield(String cmisidfield) {
 		this.cmisidfield = cmisidfield;
+	}
+
+	public boolean supportsErrorHandling(){
+		return true;
 	}
 }
