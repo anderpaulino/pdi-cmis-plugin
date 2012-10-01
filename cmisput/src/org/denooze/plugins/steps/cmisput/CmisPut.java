@@ -58,8 +58,6 @@ public class CmisPut extends BaseStep implements StepInterface
 	{ 
 		meta=(CmisPutMeta)smi;
 		data=(CmisPutData)sdi;
-		Document CmisDoc;
-		ObjectId CmisDocId;
 
 		Object[] r=getRow();    // get row, set busy!
 		if (r==null)  // no more input to be expected...
@@ -72,6 +70,59 @@ public class CmisPut extends BaseStep implements StepInterface
 			}
 			return false;
 		}
+		
+        try {
+    		processAlfrescoRow(r);
+    		
+    		Object[] outputRowData = null;
+    		
+    		outputRowData = RowDataUtil.addValueData(r, getInputRowMeta().size(), CmisConnector.getCmsdocument().getId());
+    		putRow(data.outputRowMeta, outputRowData); 
+    		
+    		 if (checkFeedback(getLinesRead())) 
+    	        {
+    	        	if(log.isBasic()) logBasic(BaseMessages.getString(PKG, "CmisPut.Log.LineNumber")+getLinesRead()); //$NON-NLS-1$
+    	        }	
+        } catch(Exception e) {
+        	if (getStepMeta().isDoingErrorHandling()) {
+        		putError(getInputRowMeta(), r, 1L, e.toString(), null, "UJE001");
+        	} else {
+        	  throw new KettleException(e);
+        	}
+        }
+		return true;
+	}
+
+	private boolean checkrow(Object[] r, TransMeta transmeta) throws KettleException {
+		
+		final String sourcfile = environmentSubstitute((String)r[data.documentfieldid]);
+		if (sourcfile==null){
+			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotDefined",sourcfile)); //$NON-NLS-1$
+		}
+		FileObject fileObject = KettleVFS.getFileObject(sourcfile, transmeta);
+		if (!(fileObject instanceof LocalFile)) {
+			// We can only use NIO on local files at the moment, so that's what we limit ourselves to.
+			//
+			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Log.OnlyLocalFilesAreSupported")); //$NON-NLS-1$
+		}
+		FileInputStream file;
+		try {
+			file = new FileInputStream(KettleVFS.getFilename(fileObject));
+			file.close();
+		} catch (FileNotFoundException e) {
+			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotFound",sourcfile)); //$NON-NLS-1$
+		} catch (IOException e) {
+			// should never occur
+			e.printStackTrace();
+		}		
+		return true;
+	}
+
+
+	private void processAlfrescoRow(Object[] r)  throws KettleException {
+		Document CmisDoc;
+		ObjectId CmisDocId;
+		
 		if (first) 
         {
 			// get the RowMeta
@@ -258,44 +309,6 @@ public class CmisPut extends BaseStep implements StepInterface
 				  }
 			}			
 		}
-
-		Object[] outputRowData = null;
-		
-		outputRowData = RowDataUtil.addValueData(r, getInputRowMeta().size(), CmisConnector.getCmsdocument().getId());
-		putRow(data.outputRowMeta, outputRowData);     // copy row to possible alternate rowset(s).
-
-        if (checkFeedback(getLinesRead())) 
-        {
-        	if(log.isBasic()) logBasic(BaseMessages.getString(PKG, "CmisPut.Log.LineNumber")+getLinesRead()); //$NON-NLS-1$
-        }
-			
-		return true;
 	}
-
-	private boolean checkrow(Object[] r, TransMeta transmeta) throws KettleException {
-		
-		final String sourcfile = environmentSubstitute((String)r[data.documentfieldid]);
-		if (sourcfile==null){
-			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotDefined",sourcfile)); //$NON-NLS-1$
-		}
-		FileObject fileObject = KettleVFS.getFileObject(sourcfile, transmeta);
-		if (!(fileObject instanceof LocalFile)) {
-			// We can only use NIO on local files at the moment, so that's what we limit ourselves to.
-			//
-			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Log.OnlyLocalFilesAreSupported")); //$NON-NLS-1$
-		}
-		FileInputStream file;
-		try {
-			file = new FileInputStream(KettleVFS.getFilename(fileObject));
-			file.close();
-		} catch (FileNotFoundException e) {
-			throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.InputFileNotFound",sourcfile)); //$NON-NLS-1$
-		} catch (IOException e) {
-			// should never occur
-			e.printStackTrace();
-		}		
-		return true;
-	}
-
 	
 }
