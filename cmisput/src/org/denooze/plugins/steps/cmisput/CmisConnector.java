@@ -960,31 +960,31 @@ public class CmisConnector implements Cloneable
 
 	}
 
-	public Map<String, Integer> GetPropertiesValueList(){
-
-		final Map<String, Integer> fields = new HashMap<String, Integer>();
-		
-		ObjectType type = session.getTypeDefinition("D:erp:document");
-//		ObjectType type = session.getTypeDefinition("P:erp:invoiceAspect");
-		Collection<PropertyDefinition<?>> properties = type.getPropertyDefinitions().values();
-		for (PropertyDefinition<?> propertyDefinition : properties) {
-			if (propertyDefinition.getLocalNamespace().equals(type.getLocalNamespace())){
-//				System.out.println(propertyDefinition.getId());
-//				System.out.println(propertyDefinition.getPropertyType());
-				if (propertyDefinition.getExtensions() != null){
-					List<CmisExtensionElement> choices = propertyDefinition.getExtensions();
-					for (int i = 0; i < choices.size(); i++) {
-						List<CmisExtensionElement> list = propertyDefinition.getExtensions().get(i).getChildren();
-						for (CmisExtensionElement cmisExtensionElement : list) {
-//							System.out.println("Choice "+ i + " :" + cmisExtensionElement.getValue());
-							fields.put(cmisExtensionElement.getValue(), i);
-						}
-					}
-				}
-			}		
-		}
-		return fields;
-	}
+//	public Map<String, Integer> GetPropertiesValueList(){
+//
+//		final Map<String, Integer> fields = new HashMap<String, Integer>();
+//		
+//		ObjectType type = session.getTypeDefinition("D:erp:document");
+////		ObjectType type = session.getTypeDefinition("P:erp:invoiceAspect");
+//		Collection<PropertyDefinition<?>> properties = type.getPropertyDefinitions().values();
+//		for (PropertyDefinition<?> propertyDefinition : properties) {
+//			if (propertyDefinition.getLocalNamespace().equals(type.getLocalNamespace())){
+////				System.out.println(propertyDefinition.getId());
+////				System.out.println(propertyDefinition.getPropertyType());
+//				if (propertyDefinition.getExtensions() != null){
+//					List<CmisExtensionElement> choices = propertyDefinition.getExtensions();
+//					for (int i = 0; i < choices.size(); i++) {
+//						List<CmisExtensionElement> list = propertyDefinition.getExtensions().get(i).getChildren();
+//						for (CmisExtensionElement cmisExtensionElement : list) {
+////							System.out.println("Choice "+ i + " :" + cmisExtensionElement.getValue());
+//							fields.put(cmisExtensionElement.getValue(), i);
+//						}
+//					}
+//				}
+//			}		
+//		}
+//		return fields;
+//	}
 		
 
 	public void setCmisDialogProperties(TableView wMetaDataList,String documenttype) {
@@ -999,7 +999,7 @@ public class CmisConnector implements Cloneable
 				for (Map.Entry<String,PropertyDefinition<?>> entry : properties.entrySet()) {
 					PropertyDefinition<?> propertyDefinition = entry.getValue();
 					if(!(propertyDefinition.getId().equals(PropertyIds.NAME)) && !(propertyDefinition.getId().equals(PropertyIds.OBJECT_TYPE_ID))){
-						propertyDefinition.getUpdatability();
+//						propertyDefinition.getUpdatability();
 						if(propertyDefinition.getUpdatability()!=Updatability.READONLY){
 							/* skip name, because already defined elsewhere & object id */
 							Table items = wMetaDataList.getTable();
