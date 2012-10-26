@@ -11,7 +11,7 @@
 	
     <!-- system properties to use -->
     <property name= "cr" 		value="${line.separator}"/> 
-    <property name="version"	value="1.3.2"/>
+    <property name="version"	value="1.4.0"/>
 
     <!-- set global properties for this build -->
 
@@ -184,12 +184,12 @@
                 dir="${distrib}" 
                 includes="**/*.*"/>
         </copy>
+    	<!--
         <copy todir="${deploydir}/lib">
             <fileset
                 dir="${resources}/lib" 
                 includes="*.jar"/>
         </copy>
-    	<!--
     	<copy todir="${deploydir}/lib">
     	        <fileset
     	             dir="${cmisconnector}" 
