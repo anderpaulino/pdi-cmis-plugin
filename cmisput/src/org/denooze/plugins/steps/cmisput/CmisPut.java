@@ -165,7 +165,7 @@ public class CmisPut extends BaseStep implements StepInterface
 					}
 					/* if document has a fixed path - make sure this path exists */
 					/* TODO allow folder type to be choosen */ 
-					if (!CmisConnector.CreatePathIfNotExists(meta.getToPath(),"F:pm:folder")){
+					if (!CmisConnector.CreatePathIfNotExists(meta.getToPath(),"cmis:folder")){
 						throw new KettleException(BaseMessages.getString(PKG, "CmisPut.Exception.ErrorCreatingToPath",meta.getToPath(),CmisConnector.getMsgError())); //$NON-NLS-1$
 					} else {
 						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Exception.CreateToPathOK",meta.getToPath())); //$NON-NLS-1$
