@@ -651,41 +651,96 @@ public class CmisConnector implements Cloneable
 		}
 	}
 
-	public Boolean CreateDynPathIfNotExists(String topath, Object[] r, int[] folderArgumentIndexes, String[] object_type_id){
+	public Boolean CreateDynPathIfNotExists(String topath, Object[] r, int[] folderArgumentIndexes, String[] object_type_id) {
 
-	    final Map<String, Object> properties = new HashMap<String, Object>();
+		final Map<String, Object> properties = new HashMap<String, Object>();
 		String CurrentFolder;
-		
+		String FolderContent;
+
 		if (topath == null) {
 			topath = "/";
 		}
-		
+
 		if (topath.endsWith("/")) {
-			topath = topath.substring(0, topath.length()-1);
+			topath = topath.substring(0, topath.length() - 1);
 		}
-		
+
 		CheckSession();
 		parentFolder = (AlfrescoFolder) getSession().getObjectByPath(topath);
-		
-		for (int i=0;i<folderArgumentIndexes.length;i++) {
-			CurrentFolder = (String) r[folderArgumentIndexes[i]];
-			if (CurrentFolder!=null) {/* we ignore empty folders */
-				topath = topath + "/" + CurrentFolder.trim();
 
-				AlfrescoFolder Folder = null;
-				try {
-					Folder = (AlfrescoFolder) getSession().getObjectByPath(topath);
-				} catch (CmisObjectNotFoundException e) {
-					try {
-						Folder = createFolder(parentFolder,CurrentFolder,properties,object_type_id[i]);
-					} catch (Exception e1) {
-						setMsgError(e.getMessage());
-						return false;
+		for (int i = 0; i < folderArgumentIndexes.length; i++) {
+			FolderContent = (String) r[folderArgumentIndexes[i]];
+			if (FolderContent != null) {/* we ignore empty folders */
+				// topath = topath + "/" + CurrentFolder.trim();
+				// topath.replace("//", "/");
+				// StringTokenizer tokenizer = new StringTokenizer(topath, "/");
+				//
+				// AlfrescoFolder Folder = null;
+				// try {
+				// Folder = (AlfrescoFolder)
+				// getSession().getObjectByPath(topath);
+				// } catch (CmisObjectNotFoundException e) {
+				// try {
+				// Folder =
+				// createFolder(parentFolder,CurrentFolder,properties,object_type_id[i]);
+				// } catch (Exception e1) {
+				// setMsgError(e.getMessage());
+				// return false;
+				// }
+				// }
+				// parentFolder = Folder;
+				// }
+				// setLastCreatedDynPath(topath);
+
+				StringTokenizer tokenizer = new StringTokenizer(FolderContent,
+						"/");
+				while (tokenizer.hasMoreTokens()) {
+					CurrentFolder = tokenizer.nextToken();
+					if (topath != null) {
+						topath = topath + "/" + CurrentFolder.trim();
+					} else {
+						topath = "/" + CurrentFolder;
 					}
+					AlfrescoFolder Folder = null;
+					Boolean Retry = true;
+					Boolean First = true;
+					Integer RetryCount = 0;/*
+											 * If at the same time 2 copies of a
+											 * step try to create a directory,
+											 * do a retry
+											 */
+					while ((RetryCount < 50) && (Retry)) {
+						RetryCount += 1;
+						try {
+							Folder = (AlfrescoFolder) getSession()
+									.getObjectByPath(topath);
+							Retry = false;
+						} catch (CmisObjectNotFoundException e) {
+							try {
+								if (First) {
+									randomDelay(100, 2000);
+									First = false;
+								} else {
+									Folder = createFolder(parentFolder,	CurrentFolder, properties, object_type_id[i]);
+									Retry = false;
+								}
+							} catch (Exception e1) {
+								setMsgError("Retry count = " + RetryCount
+										+ " Message = " + e.getMessage());
+							}
+						} catch (CmisBaseException e) {
+							setMsgError("Retry count = " + RetryCount
+									+ " Message = " + e.getMessage());
+							randomDelay(100, 2000);
+						} finally {
+							if (RetryCount == 49)
+								return false;
+						}
+					}
+					parentFolder = Folder;
+					setLastCreatedDynPath(topath);
 				}
-				parentFolder = Folder;
-			}			
-			setLastCreatedDynPath(topath);
+			}
 		}
 		return true;
 	}
@@ -693,6 +748,9 @@ public class CmisConnector implements Cloneable
 	public Boolean CreatePathIfNotExists(String topath, String object_type_id){
 	    final Map<String, Object> properties = new HashMap<String, Object>();
 		parentFolder = (AlfrescoFolder) getSession().getRootFolder();
+		if (topath==null) {
+			return false;
+		}
 		topath.replace("\"", "/");
 		StringTokenizer tokenizer = new StringTokenizer(topath, "/"); 
 		String CurrentFolder;
@@ -714,9 +772,9 @@ public class CmisConnector implements Cloneable
 				try {
 					Folder = (AlfrescoFolder) getSession().getObjectByPath(topath);
 					Retry = false;
-				} catch (CmisObjectNotFoundException e) {
+				} catch (CmisObjectNotFoundException e) {//folder does not exists
 					try {
-						if (First){
+						if (First){//wait random time before creating the folder.
 							randomDelay(100,2000);
 							First=false;
 						} else {
