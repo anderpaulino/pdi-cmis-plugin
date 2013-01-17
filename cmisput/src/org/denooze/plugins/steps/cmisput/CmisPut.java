@@ -163,7 +163,7 @@ public class CmisPut extends BaseStep implements StepInterface
 						CmisConnector.setVersioningState(VersioningState.NONE);
 						if(log.isDebug()) logDebug(BaseMessages.getString(PKG, "CmisPut.Info.VersioningState","NONE")); //$NON-NLS-1$
 					}
-					if (meta.getToPath()==null) {
+					if ((meta.getToPath()==null) || (meta.getToPath().isEmpty())) {
 						meta.setToPath("/");
 					}
 					/* if document has a fixed path - make sure this path exists */
