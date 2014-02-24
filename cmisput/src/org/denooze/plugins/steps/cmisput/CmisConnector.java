@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -401,19 +402,22 @@ public class CmisConnector implements Cloneable
 					result = true;
 				}
 				if (dataType.contains("DATETIME")) {
-					ArrayList<Date> al = new ArrayList<Date>();
+					ArrayList<GregorianCalendar> al = new ArrayList<GregorianCalendar>();
 					String multiString;
 					multiString = (String) value;
 					
 					String[] multiStringParts = multiString.split(separatorChar);
 					for (int i=0;i<multiStringParts.length;i++) {
 						try {
+							GregorianCalendar cal = new GregorianCalendar();
 							if (multiStringParts[i].length() > 10){
 								DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-								al.add(formatter.parse(multiStringParts[i]));
+								cal.setTime(formatter.parse(multiStringParts[i]));
+								al.add(cal);
 							} else {
 								DateFormat formatter = new SimpleDateFormat("yyyy/MM/dd");
-								al.add(formatter.parse(multiStringParts[i]));
+								cal.setTime(formatter.parse(multiStringParts[i]));
+								al.add(cal);
 							}
 						} 
 						catch (ParseException e) {
@@ -462,13 +466,17 @@ public class CmisConnector implements Cloneable
 		case ValueMetaInterface.TYPE_DATE:
 			if (cardinality.contains("SINGLE")) {
 				if (dataType.contains("DATETIME")) {
-					this.documentproperties.put(key, value);
+					GregorianCalendar cal = new GregorianCalendar();
+					cal.setTime((Date) value);
+					this.documentproperties.put(key, cal);
 					result = true;
 				}
 			} else { /* Cardinality is MULTI */
 				if (dataType.contains("DATETIME")) {
-					ArrayList<Date> al = new ArrayList<Date>();
-					al.add((Date) value);
+					ArrayList<GregorianCalendar> al = new ArrayList<GregorianCalendar>();
+					GregorianCalendar cal = new GregorianCalendar();
+					cal.setTime((Date) value);
+					al.add(cal);
 					this.documentproperties.put(key, al);
 					result = true;
 				}
