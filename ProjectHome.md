@@ -1,0 +1,1 @@
+This is a plugin for Pentaho Data Integration that can store documents with metadata in a cmis compliant content management system like Alfresco.
